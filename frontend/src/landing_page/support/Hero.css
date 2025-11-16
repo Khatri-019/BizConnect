@@ -1,0 +1,83 @@
+.support-hero-container{
+    padding: 5rem;
+    background: linear-gradient(to bottom, hsl(0, 0%, 95%), #f9f9f9);
+    /* background-image: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('media/images/help_desk.jpeg');
+    min-height: 70vh; 
+    background-size: cover;
+    background-repeat: no-repeat; */
+}
+
+.hero-row{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap:2rem;
+    text-align: center;
+
+}
+
+.hero-row > div:first-of-type{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.1rem 0.8rem;
+  border: 1px solid  ;
+  border-radius: 1.2rem;
+  background-color: #fdfeff;
+  font-size: 1.2rem;
+  max-width: fit-content;
+}
+
+.hero-row > div:nth-of-type(2) h1{
+  font-size: 4rem;
+  /* color: white;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.9); */
+}
+
+.colored-text{
+  background:  linear-gradient(to right, #2F80ED, #8A2BE2) ;
+  background-clip: text;
+  color: transparent;
+  /* text-shadow: none !important; */
+}
+
+.hero-row > div:nth-of-type(2) p{
+  font-size: 1.8rem;
+  color: gray;
+}
+
+
+.search-bar {
+  background-color: #eeecec ;  
+  border-radius: 12px;
+  padding: 6px;
+  width: 100%;
+  max-width: 800px;  
+  margin: 40px auto; 
+}
+
+.search-icon {
+  font-size: 1.2rem;
+  color: #999;  
+  padding: 0.5rem;
+}
+
+.search-bar input {
+  background-color: transparent !important;
+  color: #333;
+}
+
+.search-bar input::placeholder {
+  color: #777;
+  font-size: 1.3rem;
+}
+
+.search-bar .btn {
+  font-weight: 500;
+  font-size: 1.3rem;
+}
+
+.search-bar:focus-within {
+  border: 2px solid gray;
+  transition: 0.5
+}

@@ -1,0 +1,18 @@
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e6e9f0;
+}
+
+.top-bar h2 {
+  margin: 0;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+}
+
+.top-bar .icon {
+  color: #657786;
+  cursor: pointer;
+}

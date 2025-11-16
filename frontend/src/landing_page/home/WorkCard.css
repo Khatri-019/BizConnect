@@ -1,0 +1,47 @@
+.work-card {
+  border-radius: 2rem;
+  width: 33rem;
+  height: 33rem;
+  padding: 2rem;
+  background-color: #fff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s ease-in-out;
+  margin-right: 2.5rem;
+  margin-left: 2.5rem;
+}
+
+.work-card:hover {
+  transform: translateY(-10px); 
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); 
+}
+
+.work-card-icon-div{
+
+   display: flex;
+   gap: 1rem;
+   padding: 1rem;
+   align-items: center;
+}
+
+.work-card-icon-text {
+    font-size: 1.5rem;
+    color: rgb(22, 91, 255);
+
+}
+
+.work-card-title{
+    font-size:1.8rem;
+}
+.work-card-para{
+    font-size:1.5rem;
+    color: gray;
+}
+
+.work-card-list li{
+    font-size:1.3rem
+}
+
+ul.work-card-list li::marker {
+  color: #007bff; /* Change bullet color */
+  font-size: 1.5rem;
+}

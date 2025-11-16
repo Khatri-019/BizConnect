@@ -1,0 +1,23 @@
+.team-container {
+    padding: 5rem;
+    height: fit-content;
+    background: linear-gradient(to bottom, hsl(0, 0%, 95%), #f9f9f9); 
+}
+
+/* --- Heading Styles --- */
+.team-heading {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+
+.team-heading h1{
+    text-align: center;
+}
+.team-members-row {
+    display: grid;
+    grid-template-rows: repeat(2, auto);
+    grid-template-columns: repeat(3, auto);
+    justify-content: center; 
+    gap: 2rem;            
+    padding-bottom: 1.5rem; 
+}

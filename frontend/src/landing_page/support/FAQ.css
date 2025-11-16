@@ -1,0 +1,33 @@
+.my-accordion{
+  margin-top: 2rem;
+
+}
+.accordion-header button {
+   font-weight: 500 ;
+   font-size: 1.2rem;
+}
+
+.accordion-item {
+    margin-bottom: 1.5rem;
+}
+
+
+.accordion-button:focus {
+  outline: 0 !important;
+  border-color: transparent !important;
+  background-color: transparent !important;
+}
+
+.accordion-button:not(.collapsed) {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  color: inherit !important;
+}
+
+.accordion-body{
+  font-size: 1.4rem;
+}
+
+.accordion-header button{
+  font-size: 1.4rem;
+}

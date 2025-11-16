@@ -1,0 +1,85 @@
+.experts-hero-container {
+    background-color: #f8f9fa; /* A light, neutral background */
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+}
+
+.experts-hero-row h1 {
+    font-size: 4rem; /* Adjusted for better responsiveness */
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.experts-hero-row p {
+    font-size: 2rem;
+    color: #6c757d;
+}
+
+
+.search-container {
+    background-color: #ffffff;
+    padding: 0.75rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    gap: 2rem; 
+    margin-top: 2rem;
+}
+
+
+.search-container .form-control,
+.search-container .form-select,
+.search-container .input-group-text {
+    border: none;
+    background-color: #f4f4f7; 
+    border-radius: 8px;
+    padding-top: 0.75rem; 
+    padding-bottom: 0.75rem;
+    font-size: 1.3rem;
+}
+
+.search-container .form-control:focus,
+.search-container .form-select:focus {
+    box-shadow: none;
+    background-color: #f4f4f7;
+}
+
+
+/* Style the dropdown button to match the other inputs */
+.custom-dropdown-toggle {
+    background-color: #f4f4f7 !important;
+    border: none;
+    color: #212529; 
+    width: 250px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-radius: 8px;
+    font-size: 1.3rem;
+}
+
+
+.dropdown-menu {
+    width: 100%; 
+    border-radius: 12px;
+    border: 1px solid #eee;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    padding: 0.3rem;
+}
+
+
+.dropdown-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-radius: 9px;
+    font-size: 1.3rem;
+}
+
+/* Add a subtle hover/focus effect to the items */
+.dropdown-item:hover, .dropdown-item:focus {
+    background-color: rgb(231, 229, 229);
+    color: #212529;
+}

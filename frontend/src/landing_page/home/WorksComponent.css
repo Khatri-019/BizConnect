@@ -1,0 +1,6 @@
+.works-card-container{
+    padding: 10rem;
+    display: flex;
+    justify-content: space-around;
+    margin-top: -8rem;;
+}

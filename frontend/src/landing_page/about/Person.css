@@ -1,0 +1,19 @@
+.person-card{
+    text-align: center;
+}
+
+.person-card img{
+    width: 40%;
+    border-radius: 100%;
+}
+
+
+.person-card h4{
+    font-size: 2rem;
+    margin-top: 2rem;
+}
+
+.person-card p{
+    font-size: 1.2rem;
+
+}

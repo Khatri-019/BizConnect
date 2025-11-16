@@ -1,0 +1,36 @@
+.category-card {
+    max-width: 540px;
+    border-radius: 2rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease-in-out, box-shadow 0.3s ease-in-out;
+}
+
+.category-card .icon {
+    transition: transform 0.2s ease-in-out;
+}
+
+
+.category-card:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3); 
+}
+
+.category-card:hover .icon {
+    transform: scale(1.1);
+}   
+
+.category-card-icon-div{
+    padding: 2rem;
+    margin-right: 1rem;
+}
+
+.category-card-title{
+    font-size: 1.8rem;
+}
+
+.category-card-text{
+    font-size: 1.4rem;
+}
+
+.category-card-secon-text{
+    font-size:1.3rem
+}

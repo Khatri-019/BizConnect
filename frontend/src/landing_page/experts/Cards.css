@@ -1,0 +1,14 @@
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    padding: 5rem;
+    gap: 8rem; 
+    align-items: stretch;
+    /* background-color: #f8f9fa; */
+}
+
+.card-container > * {
+    flex: 0 0 32%;
+    box-sizing: border-box;
+    margin-bottom: 2rem;
+}
