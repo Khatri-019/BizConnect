@@ -4,6 +4,11 @@ import cors from "cors";
 import db from './config/db.js';
 import expertRoutes from './routes/expertRoutes.js';
 
+import helmet from "helmet";
+import authRoutes from "./routes/auth.js";
+import protectedRoutes from "./routes/protectedExample.js";
+import cookieParser from "cookie-parser";
+
 const PORT = process.env.PORT || 5000;
 
 // Load environment variables from .env file
@@ -16,10 +21,13 @@ const app = express();
 
 app.use(cors({ origin: "http://localhost:5173" })); // allow frontend
 app.use(express.json());
+app.use(helmet());
+app.use(cookieParser());
 
 // routes
 app.use('/api/experts', expertRoutes);
-
+app.use("/api/auth", authRoutes);
+app.use("/api", protectedRoutes);
 
 
 app.listen(PORT, () => {

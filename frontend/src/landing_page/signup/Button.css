@@ -1,0 +1,42 @@
+.singup-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  outline: none;
+  padding: 0.625rem 1rem;
+  height: 2.5rem;
+}
+
+.singup-btn:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.singup-btn-default {
+  background: #3b82f6;
+  color: #ffffff;
+}
+
+.singup-btn-default:hover:not(.singup-btn-disabled) {
+  background: #2563eb;
+}
+
+.singup-btn-disabled {
+  pointer-events: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.singup-btn svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
+}

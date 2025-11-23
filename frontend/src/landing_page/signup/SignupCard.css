@@ -1,0 +1,13 @@
+.singup-card {
+  background: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.15);
+  padding: 2rem;
+}
+
+@media (max-width: 640px) {
+  .signup-card {
+    padding: 1.5rem;
+  }
+}
