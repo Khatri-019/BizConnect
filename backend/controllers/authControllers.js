@@ -6,39 +6,38 @@ import bcrypt from "bcryptjs";
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",                 // or "strict"
-  //domain: process.env.COOKIE_DOMAIN // set in production carefully
+  sameSite: "strict",
 };
 
 export const register = async (req, res) => {
-  const { name, email, password, role } = req.body;
-  if (!email || !password || !name) return res.status(400).json({ message: "Missing fields" });
+  const { username,password, role } = req.body;
+  if (!password || !username) return res.status(400).json({ message: "Missing fields" });
 
-  const existing = await User.findOne({ email });
+  const existing = await User.findOne({ username });
   if (existing) return res.status(409).json({ message: "User already exists" });
 
-  const user = new User({ name, email, password, role });
+  const newUser = new User({ username,password, role });
   await user.save();
 
   // create tokens
-  const accessToken = createAccessToken({ id: user._id, role: user.role });
-  const refreshToken = createRefreshToken({ id: user._id, role: user.role });
+  const accessToken = createAccessToken({ id: newUser._id, role: newUser.role });
+  const refreshToken = createRefreshToken({ id: newUser._id, role: newUser.role });
 
   // store hashed refresh token
   const hashed = await hashToken(refreshToken);
-  user.refreshTokens.push({ token: hashed, createdAt: new Date(), expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) });
-  await user.save();
+  newUser.refreshTokens.push({ token: hashed, createdAt: new Date(), expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) });
+  await newUser.save();
 
   // set cookies
   res.cookie("accessToken", accessToken, { ...cookieOptions, maxAge: 1000 * 60 * 15 }); // 15m
   res.cookie("refreshToken", refreshToken, { ...cookieOptions, maxAge: 1000 * 60 * 60 * 24 * 7 }); // 7d
 
-  res.status(201).json({ message: "Registered", user: { id: user._id, email: user.email, name: user.name, role: user.role } });
+  res.status(201).json({ message: "Registered", newUser: { id: newUser._id, username: newUser.username, role: newUser.role } });
 };
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
-  const user = await User.findOne({ email });
+  const { username, password } = req.body;
+  const user = await User.findOne({ username });
   if (!user) return res.status(401).json({ message: "Invalid credentials" });
 
   const match = await user.matchPassword(password);
@@ -60,7 +59,7 @@ export const login = async (req, res) => {
   res.cookie("accessToken", accessToken, { ...cookieOptions, maxAge: 1000 * 60 * 15 });
   res.cookie("refreshToken", refreshToken, { ...cookieOptions, maxAge: 1000 * 60 * 60 * 24 * 7 });
 
-  res.json({ message: "Logged in", user: { id: user._id, name: user.name, email: user.email, role: user.role } });
+  res.json({ message: "Logged in", user: { id: user._id, username: user.username,role: user.role } });
 };
 
 export const refresh = async (req, res) => {
