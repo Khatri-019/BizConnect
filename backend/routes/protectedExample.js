@@ -1,5 +1,5 @@
 import express from "express";
-import { protect, authorizeRoles } from "../middleware/auth.js";
+import { protect, authorizeRoles } from "../middlewares/auth.js";
 const router = express.Router();
 
 router.get("/admin-only", protect, authorizeRoles("admin"), (req, res) => {

@@ -10,6 +10,7 @@ import protectedRoutes from "./routes/protectedExample.js";
 import cookieParser from "cookie-parser";
 
 const PORT = process.env.PORT || 5000;
+const allowedOrigin = 'http://localhost:5173';
 
 // Load environment variables from .env file
 dotenv.config();
@@ -17,9 +18,16 @@ dotenv.config();
 // Connect to MongoDB
 db.connectDB();
 
+// loading express
 const app = express();
 
-app.use(cors({ origin: "http://localhost:5173" })); // allow frontend
+app.use(cors({
+  origin: allowedOrigin,
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true, // <-- CRITICAL: Allows sending/receiving HTTP-only cookies
+  optionsSuccessStatus: 200,
+}));
+
 app.use(express.json());
 app.use(helmet());
 app.use(cookieParser());

@@ -1,4 +1,7 @@
 import User from "../models/user.js";
+import Expert from "../models/expert.js";
+
+
 import { createAccessToken, createRefreshToken, hashToken, verifyRefreshToken } from "../utils/token.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
@@ -6,7 +9,7 @@ import bcrypt from "bcryptjs";
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "strict",
+  sameSite: "lax",
 };
 
 export const register = async (req, res) => {
@@ -17,7 +20,7 @@ export const register = async (req, res) => {
   if (existing) return res.status(409).json({ message: "User already exists" });
 
   const newUser = new User({ username,password, role });
-  await user.save();
+  await newUser.save();
 
   // create tokens
   const accessToken = createAccessToken({ id: newUser._id, role: newUser.role });
@@ -132,4 +135,71 @@ export const me = async (req, res) => {
   // req.user set by protect middleware
   const user = await User.findById(req.user.id).select("-password -refreshTokens");
   res.json(user);
+};
+
+
+
+
+export const registerExpert = async (req, res) => {
+  const { username, password, img, name, industry, location, experienceYears, description, rating, pricing } = req.body;
+  
+  // 1. Basic Validation and Existence Check
+  if (!username || !password) return res.status(400).json({ message: "Missing username or password" });
+
+  const existingUser = await User.findOne({ username });
+  if (existingUser) return res.status(409).json({ message: "User already exists" });
+
+  // 2. Create User (Mongoose uses nanoid() for _id)
+  const newUser = new User({ username, password, role: "expert" }); 
+  
+  try {
+    await newUser.save(); 
+    
+    // 3. Create and Save Expert Profile
+    const expertProfile = new Expert({
+      _id: newUser._id, // CRITICAL: Link using the new User ID
+      img, name, industry, location, experienceYears, description, rating, pricing,
+    });
+    
+    await expertProfile.save(); 
+    
+    // 4. If both succeed, create tokens and respond
+    const accessToken = createAccessToken({ id: newUser._id, role: newUser.role });
+    const refreshToken = createRefreshToken({ id: newUser._id, role: newUser.role });
+    const hashed = await hashToken(refreshToken);
+
+    // Save refresh tokens to user document
+    newUser.refreshTokens.push({ token: hashed, createdAt: new Date(), expiresAt: new Date(Date.now() + 7*24*60*60*1000) });
+    await newUser.save(); 
+
+    // Cookies (adjust secure:false for dev environment)
+    res.cookie("accessToken", accessToken, { httpOnly: true, secure: false }); 
+    res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: false });
+
+    return res.status(201).json({ message: "Expert account created successfully." });
+
+  } catch (error) {
+    // 5. CLEANUP: If the Expert save fails, DELETE the User
+    if (newUser._id) {
+      await User.findByIdAndDelete(newUser._id);
+    }
+    console.error("Combined registration failed. User deleted due to profile error:", error.message);
+    return res.status(500).json({ 
+      message: error.message || "Profile creation failed. Account aborted." 
+    });
+  }
+};
+
+export const checkUsername = async (req, res) => {
+  const { username } = req.body;
+  
+  if (!username) return res.status(400).json({ message: "Username is required" });
+
+  const existingUser = await User.findOne({ username });
+  
+  if (existingUser) {
+    return res.status(409).json({ message: "Username is taken", available: false });
+  }
+  
+  return res.status(200).json({ message: "Username available", available: true });
 };

@@ -1,13 +1,58 @@
-.singup-card {
+.signup-card {
   background: #ffffff;
-  border-radius: 0.75rem;
-  border: 1px solid rgba(226, 232, 240, 0.5);
-  box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.15);
-  padding: 2rem;
+  border-radius: 1rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  padding: 2.5rem;
+  
+
+  width: 100% !important;
+  height: 100% !important;
+  box-sizing: border-box; 
+  margin: 0;
 }
+
+
 
 @media (max-width: 640px) {
   .signup-card {
     padding: 1.5rem;
   }
+}
+
+
+.signup-card-header {
+  padding-bottom: 2rem;
+  text-align: center;
+}
+
+.signup-card-title {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.5rem;
+}
+
+.signup-card-description {
+  font-size: 1.4rem;
+  color: #64748b;
+}
+
+.signup-card-content {
+  padding: 0;
+}
+
+
+/* Size for Step 1: Username & Password (Small) */
+.signup-card-step-1 {
+  width: 30vw !important;
+  /* min-height: 400px;  */
+}
+
+/* Size for Step 2: Expert Profile (Wide) */
+.signup-card-step-2 {
+  width: 40vw !important;
 }

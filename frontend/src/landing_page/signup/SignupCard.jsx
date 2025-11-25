@@ -3,7 +3,7 @@ import "./SignupCard.css";
 
 function SignupCard({ children, className = "" }) {
   return (
-    <div className={`singup-card ${className}`}>
+    <div className={`signup-card ${className}`}>
       {children}
     </div>
   );

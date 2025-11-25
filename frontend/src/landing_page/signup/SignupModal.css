@@ -1,0 +1,64 @@
+.signup-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6); /* Slightly darker for focus */
+  backdrop-filter: blur(5px); /* Blur the background */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999; /* Very high z-index to sit on top of everything */
+  animation: fadeIn 0.3s ease-out;
+}
+
+/* --- THIS IS THE BOX YOU WANT TO RESIZE --- */
+.signup-modal-content {
+  position: relative;
+  
+  /* WIDTH SETTINGS: Change '650px' to increase/decrease width */
+  width: fit-content; 
+  min-width: 300px;          /* Prevents it from getting too small */
+  max-width: 95vw !important; /* Responsive: fits on mobile screens */
+
+  /* HEIGHT SETTINGS */
+  max-height: 90vh;          /* Never taller than 90% of screen */
+  overflow-y: auto;          /* Scroll if content is too tall */
+  
+  /* LAYOUT */
+  display: flex;
+  flex-direction: column;
+  background: transparent;   /* Let the card inside provide the background */
+  border-radius: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.close-modal-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(255, 255, 255, 0.8);
+  border: none;
+  color: #333;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  z-index: 100; /* Ensure it sits above the card content */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.close-modal-btn:hover {
+  background-color: #ff4d4d;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+} 

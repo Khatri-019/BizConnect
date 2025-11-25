@@ -1,8 +1,12 @@
+import React from "react";
 import "./ExpDifference.css"
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
+import { useSignup } from "../../context/SignupContext"; // 1. Import context
 
 function ExpDiffernce() {
+    const { openSignup } = useSignup(); // 2. Get the function
+
     return (
         <div className="container-fluid exp-diff-container">
             <div className="row exp-diff-row ">
@@ -12,15 +16,18 @@ function ExpDiffernce() {
                         Join thousands of business professionals who've made the switch to BizConnect
                     </p>
                     <div className="exp-diff-buttons">
+                        {/* 3. Update Get Started button */}
                         <button
                             className="btn btn-dark mr-3 get-started-btn"
                             style={{ fontSize: "1.5rem", borderRadius: "15px" }}
+                            onClick={openSignup}
                         >
                             <span>Get Started </span>
                             <span className="arrow-icon">
                                 <ArrowForwardOutlinedIcon fontSize="larger" />
                             </span>
                         </button>
+                        
                         <button
                             className="btn btn-light mr-3"
                             style={{ fontSize: "1.4rem", borderRadius: "15px", borderColor: "#494F55" }}

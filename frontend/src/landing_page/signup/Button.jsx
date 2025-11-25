@@ -13,7 +13,7 @@ const Button = React.forwardRef(({
     <button
       ref={ref}
       type={type}
-      className={`singup-btn btn-${variant} ${className} ${disabled ? 'btn-disabled' : ''}`}
+      className={`signup-btn btn-${variant} ${className} ${disabled ? 'btn-disabled' : ''}`}
       disabled={disabled}
       {...props}
     >
