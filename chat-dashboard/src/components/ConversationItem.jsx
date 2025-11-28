@@ -18,29 +18,7 @@ const getDefaultAvatar = (name) => {
 };
 
 function ConversationItem({ conversation, onSelect, isActive }) {
-  const { user, lastMessage, lastMessageAt, unreadCount } = conversation;
-
-  const formatTime = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now - date;
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (days === 0) {
-      return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: true 
-      });
-    } else if (days === 1) {
-      return "Yesterday";
-    } else if (days < 7) {
-      return date.toLocaleDateString('en-US', { weekday: 'short' });
-    } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-  };
+  const { user, lastMessage, unreadCount } = conversation;
 
   return (
     <div
@@ -65,7 +43,6 @@ function ConversationItem({ conversation, onSelect, isActive }) {
       <div className="conversation-meta">
         <div className="conversation-top">
           <span className="name">{user?.name || "Unknown User"}</span>
-          <span className="time">{formatTime(lastMessageAt)}</span>
         </div>
         <div className="conversation-bottom">
           <span className="last-message">{lastMessage || "No messages yet"}</span>
