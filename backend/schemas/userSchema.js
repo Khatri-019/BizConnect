@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 
 const userSchema = new mongoose.Schema({
-  _id: { type: String ,default: () => nanoid() }, // if you want custom nanoid, else remove
+  _id: { type: String ,default: () => nanoid() },  
   username: { type: String, required: true },
   // email: { type: String, required: true, unique: true, lowercase: true },
   password: { type: String, required: true },

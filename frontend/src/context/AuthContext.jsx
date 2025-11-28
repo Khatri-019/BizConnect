@@ -1,55 +1,117 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+import React, { createContext, useState, useContext, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { authAPI } from "../services/api";
 
 const AuthContext = createContext();
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+};
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  
+  // Modal states (merged from SignupContext)
+  const [isSignupOpen, setIsSignupOpen] = useState(false);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
+  
   const navigate = useNavigate();
 
-  // Check if user is already logged in (via cookie) on initial load
+  // Check if user is already logged in on initial load
   useEffect(() => {
-    const checkUser = async () => {
+    const checkAuth = async () => {
       try {
-        // We hit the /me endpoint to see if the HTTP-only cookie is valid
-        const res = await axios.get("http://localhost:5000/api/auth/me",{withCredentials:true});
-        setUser(res.data);
+        const userData = await authAPI.getCurrentUser();
+        setUser(userData);
       } catch (error) {
-        if (error.response && (error.response.status === 401 || error.response.status === 403)) {
-          setUser(null);
-        } else {
-          // Only log real errors (like 500 Server Error)
+        // 401/403 means not logged in - this is expected, not an error
+        if (error.response?.status !== 401 && error.response?.status !== 403) {
           console.error("Auth check failed:", error.message);
         }
+        setUser(null);
       } finally {
         setLoading(false);
       }
     };
-    checkUser();
+    
+    checkAuth();
   }, []);
 
-  const login = (userData) => {
-    setUser(userData);
-    navigate("/experts"); // Navigate to Find Experts after login
-  };
+  // Login - calls API and sets user
+  const login = useCallback(async (credentials) => {
+    const response = await authAPI.login(credentials);
+    setUser(response.user);
+    setIsLoginOpen(false);
+    navigate("/experts");
+    return response;
+  }, [navigate]);
 
-  const logout = async () => {
+  // Set user directly (used after signup when cookies are already set)
+  const setAuthUser = useCallback((userData) => {
+    setUser(userData);
+  }, []);
+
+  // Logout - calls API and clears user
+  const logout = useCallback(async () => {
     try {
-      await axios.post("http://localhost:5000/api/auth/logout",{withCredentials:true});
-      setUser(null);
-      navigate("/"); // Navigate to Home after logout
+      await authAPI.logout();
     } catch (error) {
-      console.error("Logout failed", error);
+      console.error("Logout error:", error);
+    } finally {
+      setUser(null);
+      navigate("/");
     }
+  }, [navigate]);
+
+  // Modal controls
+  const openSignup = useCallback(() => {
+    setIsLoginOpen(false);
+    setIsSignupOpen(true);
+  }, []);
+
+  const closeSignup = useCallback(() => {
+    setIsSignupOpen(false);
+  }, []);
+
+  const openLogin = useCallback(() => {
+    setIsSignupOpen(false);
+    setIsLoginOpen(true);
+  }, []);
+
+  const closeLogin = useCallback(() => {
+    setIsLoginOpen(false);
+  }, []);
+
+  const value = {
+    // Auth state
+    user,
+    loading,
+    isAuthenticated: !!user,
+    
+    // Auth actions
+    login,
+    logout,
+    setAuthUser,
+    
+    // Modal state & actions
+    isSignupOpen,
+    isLoginOpen,
+    openSignup,
+    closeSignup,
+    openLogin,
+    closeLogin,
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={value}>
       {!loading && children}
     </AuthContext.Provider>
   );
 };
+
+export default AuthContext;

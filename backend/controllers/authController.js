@@ -1,205 +1,372 @@
 import User from "../models/user.js";
 import Expert from "../models/expert.js";
-
-
-import { createAccessToken, createRefreshToken, hashToken, verifyRefreshToken } from "../utils/token.js";
-import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
+import {
+  createAccessToken,
+  createRefreshToken,
+  hashToken,
+  verifyRefreshToken,
+} from "../utils/token.js";
 
+// Cookie configuration
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
   sameSite: "lax",
 };
 
-export const register = async (req, res) => {
-  const { username,password, role } = req.body;
-  if (!password || !username) return res.status(400).json({ message: "Missing fields" });
+const ACCESS_TOKEN_MAX_AGE = 1000 * 60 * 15; // 15 minutes
+const REFRESH_TOKEN_MAX_AGE = 1000 * 60 * 60 * 24 * 7; // 7 days
 
-  const existing = await User.findOne({ username });
-  if (existing) return res.status(409).json({ message: "User already exists" });
+// ============ HELPERS ============
 
-  const newUser = new User({ username,password, role });
-  await newUser.save();
-
-  // create tokens
-  const accessToken = createAccessToken({ id: newUser._id, role: newUser.role });
-  const refreshToken = createRefreshToken({ id: newUser._id, role: newUser.role });
-
-  // store hashed refresh token
-  const hashed = await hashToken(refreshToken);
-  newUser.refreshTokens.push({ token: hashed, createdAt: new Date(), expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) });
-  await newUser.save();
-
-  // set cookies
-  res.cookie("accessToken", accessToken, { ...cookieOptions, maxAge: 1000 * 60 * 15 }); // 15m
-  res.cookie("refreshToken", refreshToken, { ...cookieOptions, maxAge: 1000 * 60 * 60 * 24 * 7 }); // 7d
-
-  res.status(201).json({ message: "Registered", newUser: { id: newUser._id, username: newUser.username, role: newUser.role } });
-};
-
-export const login = async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
-  if (!user) return res.status(401).json({ message: "Invalid credentials" });
-
-  const match = await user.matchPassword(password);
-  if (!match) return res.status(401).json({ message: "Invalid credentials" });
-
+/**
+ * Creates tokens and sets cookies for a user
+ */
+const setAuthCookies = async (res, user) => {
   const accessToken = createAccessToken({ id: user._id, role: user.role });
   const refreshToken = createRefreshToken({ id: user._id, role: user.role });
 
-  const hashed = await hashToken(refreshToken);
-
-  if (user.refreshTokens.length > 5) {
-  user.refreshTokens = user.refreshTokens.slice(-5);
+  // Store hashed refresh token in database
+  const hashedToken = await hashToken(refreshToken);
+  
+  // Limit stored refresh tokens to 5 per user
+  if (user.refreshTokens.length >= 5) {
+    user.refreshTokens = user.refreshTokens.slice(-4);
   }
-
-  user.refreshTokens.push({ token: hashed, createdAt: new Date(), expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) });
-  // optionally limit number of refresh tokens stored per user
+  
+  user.refreshTokens.push({
+    token: hashedToken,
+    createdAt: new Date(),
+    expiresAt: new Date(Date.now() + REFRESH_TOKEN_MAX_AGE),
+  });
+  
   await user.save();
 
-  res.cookie("accessToken", accessToken, { ...cookieOptions, maxAge: 1000 * 60 * 15 });
-  res.cookie("refreshToken", refreshToken, { ...cookieOptions, maxAge: 1000 * 60 * 60 * 24 * 7 });
-
-  res.json({ message: "Logged in", user: { id: user._id, username: user.username,role: user.role } });
+  // Set HTTP-only cookies
+  res.cookie("accessToken", accessToken, {
+    ...cookieOptions,
+    maxAge: ACCESS_TOKEN_MAX_AGE,
+  });
+  res.cookie("refreshToken", refreshToken, {
+    ...cookieOptions,
+    maxAge: REFRESH_TOKEN_MAX_AGE,
+  });
 };
 
+// ============ CONTROLLERS ============
+
+/**
+ * Check if username is available
+ * POST /api/auth/check-username
+ */
+export const checkUsername = async (req, res) => {
+  try {
+    const { username } = req.body;
+
+    if (!username) {
+      return res.status(400).json({ message: "Username is required" });
+    }
+
+    const existingUser = await User.findOne({ 
+      username: username.toLowerCase().trim() 
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ 
+        message: "Username is taken", 
+        available: false 
+      });
+    }
+
+    return res.status(200).json({ 
+      message: "Username available", 
+      available: true 
+    });
+  } catch (error) {
+    console.error("Check username error:", error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
+/**
+ * Register a new user (basic registration)
+ * POST /api/auth/register
+ */
+export const register = async (req, res) => {
+  try {
+    const { username, password, role = "user" } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password required" });
+    }
+
+    const existingUser = await User.findOne({ 
+      username: username.toLowerCase().trim() 
+    });
+    
+    if (existingUser) {
+      return res.status(409).json({ message: "User already exists" });
+    }
+
+    const newUser = new User({
+      username: username.toLowerCase().trim(),
+      password,
+      role,
+    });
+    
+    await newUser.save();
+    await setAuthCookies(res, newUser);
+
+    return res.status(201).json({
+      message: "Registered successfully",
+      user: {
+        id: newUser._id,
+        username: newUser.username,
+        role: newUser.role,
+      },
+    });
+  } catch (error) {
+    console.error("Register error:", error);
+    return res.status(500).json({ message: "Registration failed" });
+  }
+};
+
+/**
+ * Register expert (user + expert profile in one transaction)
+ * POST /api/auth/expert-register
+ */
+export const registerExpert = async (req, res) => {
+  const {
+    username,
+    password,
+    img,
+    name,
+    industry,
+    location,
+    experienceYears,
+    description,
+    rating,
+    pricing,
+  } = req.body;
+
+  // Validation
+  if (!username || !password) {
+    return res.status(400).json({ message: "Username and password required" });
+  }
+
+  if (!name || !img || !pricing) {
+    return res.status(400).json({ message: "Name, image, and pricing required" });
+  }
+
+  try {
+    // Check if username exists
+    const existingUser = await User.findOne({ 
+      username: username.toLowerCase().trim() 
+    });
+    
+    if (existingUser) {
+      return res.status(409).json({ message: "Username already taken" });
+    }
+
+    // Create user
+    const newUser = new User({
+      username: username.toLowerCase().trim(),
+      password,
+      role: "expert",
+    });
+    
+    await newUser.save();
+
+    // Create expert profile
+    const expertProfile = new Expert({
+      _id: newUser._id, // Link to user
+      img,
+      name: name.trim(),
+      industry: industry?.trim(),
+      location: location?.trim(),
+      experienceYears,
+      description: description?.trim(),
+      rating: rating || 0,
+      pricing,
+    });
+
+    await expertProfile.save();
+
+    // Set auth cookies
+    await setAuthCookies(res, newUser);
+
+    return res.status(201).json({
+      message: "Expert account created successfully",
+      user: {
+        id: newUser._id,
+        username: newUser.username,
+        role: newUser.role,
+      },
+    });
+  } catch (error) {
+    // Cleanup: Delete user if expert creation failed
+    if (error.message.includes("Expert")) {
+      await User.findOneAndDelete({ username: username.toLowerCase().trim() });
+    }
+    
+    console.error("Expert registration error:", error);
+    return res.status(500).json({
+      message: error.message || "Registration failed",
+    });
+  }
+};
+
+/**
+ * Login user
+ * POST /api/auth/login
+ */
+export const login = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password required" });
+    }
+
+    const user = await User.findOne({ 
+      username: username.toLowerCase().trim() 
+    });
+    
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const isMatch = await user.matchPassword(password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    await setAuthCookies(res, user);
+
+    return res.json({
+      message: "Logged in successfully",
+      user: {
+        id: user._id,
+        username: user.username,
+        role: user.role,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    return res.status(500).json({ message: "Login failed" });
+  }
+};
+
+/**
+ * Refresh access token
+ * POST /api/auth/refresh
+ */
 export const refresh = async (req, res) => {
   try {
     const token = req.cookies.refreshToken;
-    if (!token) return res.status(401).json({ message: "No refresh token" });
+    
+    if (!token) {
+      return res.status(401).json({ message: "No refresh token" });
+    }
 
-    // verify signature
-    const decoded = verifyRefreshToken(token); // may throw
-    const userId = decoded.id;
+    // Verify token signature
+    const decoded = verifyRefreshToken(token);
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      return res.status(401).json({ message: "Invalid refresh token" });
+    }
 
-    const user = await User.findById(userId);
-    if (!user) return res.status(401).json({ message: "Invalid refresh token" });
+    // Find matching token in database
+    let tokenIndex = -1;
+    for (let i = 0; i < user.refreshTokens.length; i++) {
+      const isMatch = await bcrypt.compare(token, user.refreshTokens[i].token);
+      if (isMatch) {
+        tokenIndex = i;
+        break;
+      }
+    }
 
-    // verify token exists in DB (compare hashed)
-    const matchFound = await Promise.all(user.refreshTokens.map(async rt => await bcrypt.compare(token, rt.token)));
-    if (!matchFound.some(Boolean)) {
-      // token not found -> maybe stolen or revoked
+    if (tokenIndex === -1) {
       return res.status(401).json({ message: "Refresh token revoked" });
     }
 
-    // rotate: remove the matched token and issue new
-    // find index
-    const idx = user.refreshTokens.findIndex(rt => bcrypt.compareSync(token, rt.token));
-    if (idx !== -1) user.refreshTokens.splice(idx, 1);
+    // Remove old token (rotation)
+    user.refreshTokens.splice(tokenIndex, 1);
 
-    // issue new tokens
-    const newAccess = createAccessToken({ id: user._id, role: user.role });
-    const newRefresh = createRefreshToken({ id: user._id, role: user.role });
-    const newHashed = await hashToken(newRefresh);
-    user.refreshTokens.push({ token: newHashed, createdAt: new Date(), expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) });
-    await user.save();
+    // Issue new tokens
+    await setAuthCookies(res, user);
 
-    // set cookies
-    res.cookie("accessToken", newAccess, { ...cookieOptions, maxAge: 1000 * 60 * 15 });
-    res.cookie("refreshToken", newRefresh, { ...cookieOptions, maxAge: 1000 * 60 * 60 * 24 * 7 });
-
-    res.json({ message: "Refreshed" });
-  } catch (err) {
+    return res.json({ message: "Token refreshed" });
+  } catch (error) {
+    console.error("Refresh error:", error);
     return res.status(401).json({ message: "Invalid refresh token" });
   }
 };
 
+/**
+ * Logout user
+ * POST /api/auth/logout
+ */
 export const logout = async (req, res) => {
   try {
     const token = req.cookies.refreshToken;
+    
     if (token) {
-      // remove this refresh token from DB
-      const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
-      const user = await User.findById(decoded.id);
-      if (user) {
-        user.refreshTokens = await Promise.all(user.refreshTokens.filter(rt => !bcrypt.compareSync(token, rt.token)));
-        await user.save();
+      try {
+        const decoded = verifyRefreshToken(token);
+        const user = await User.findById(decoded.id);
+        
+        if (user) {
+          // Remove matching refresh token
+          const updatedTokens = [];
+          for (const rt of user.refreshTokens) {
+            const isMatch = await bcrypt.compare(token, rt.token);
+            if (!isMatch) {
+              updatedTokens.push(rt);
+            }
+          }
+          user.refreshTokens = updatedTokens;
+          await user.save();
+        }
+      } catch (e) {
+        // Token invalid - continue with logout
       }
     }
 
-    // clear cookies
+    // Clear cookies
     res.clearCookie("accessToken", cookieOptions);
     res.clearCookie("refreshToken", cookieOptions);
 
-    res.json({ message: "Logged out" });
-  } catch (err) {
-    res.clearCookie("accessToken", cookieOptions);
-    res.clearCookie("refreshToken", cookieOptions);
-    res.json({ message: "Logged out" });
-  }
-};
-
-export const me = async (req, res) => {
-  // req.user set by protect middleware
-  const user = await User.findById(req.user.id).select("-password -refreshTokens");
-  res.json(user);
-};
-
-
-
-
-export const registerExpert = async (req, res) => {
-  const { username, password, img, name, industry, location, experienceYears, description, rating, pricing } = req.body;
-  
-  // 1. Basic Validation and Existence Check
-  if (!username || !password) return res.status(400).json({ message: "Missing username or password" });
-
-  const existingUser = await User.findOne({ username });
-  if (existingUser) return res.status(409).json({ message: "User already exists" });
-
-  // 2. Create User (Mongoose uses nanoid() for _id)
-  const newUser = new User({ username, password, role: "expert" }); 
-  
-  try {
-    await newUser.save(); 
-    
-    // 3. Create and Save Expert Profile
-    const expertProfile = new Expert({
-      _id: newUser._id, // CRITICAL: Link using the new User ID
-      img, name, industry, location, experienceYears, description, rating, pricing,
-    });
-    
-    await expertProfile.save(); 
-    
-    // 4. If both succeed, create tokens and respond
-    const accessToken = createAccessToken({ id: newUser._id, role: newUser.role });
-    const refreshToken = createRefreshToken({ id: newUser._id, role: newUser.role });
-    const hashed = await hashToken(refreshToken);
-
-    // Save refresh tokens to user document
-    newUser.refreshTokens.push({ token: hashed, createdAt: new Date(), expiresAt: new Date(Date.now() + 7*24*60*60*1000) });
-    await newUser.save(); 
-
-    // Cookies (adjust secure:false for dev environment)
-    res.cookie("accessToken", accessToken, { httpOnly: true, secure: false }); 
-    res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: false });
-
-    return res.status(201).json({ message: "Expert account created successfully." });
-
+    return res.json({ message: "Logged out successfully" });
   } catch (error) {
-    // 5. CLEANUP: If the Expert save fails, DELETE the User
-    if (newUser._id) {
-      await User.findByIdAndDelete(newUser._id);
-    }
-    console.error("Combined registration failed. User deleted due to profile error:", error.message);
-    return res.status(500).json({ 
-      message: error.message || "Profile creation failed. Account aborted." 
-    });
+    // Still clear cookies on error
+    res.clearCookie("accessToken", cookieOptions);
+    res.clearCookie("refreshToken", cookieOptions);
+    return res.json({ message: "Logged out" });
   }
 };
 
-export const checkUsername = async (req, res) => {
-  const { username } = req.body;
-  
-  if (!username) return res.status(400).json({ message: "Username is required" });
+/**
+ * Get current user
+ * GET /api/auth/me (protected)
+ */
+export const me = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select("-password -refreshTokens");
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-  const existingUser = await User.findOne({ username });
-  
-  if (existingUser) {
-    return res.status(409).json({ message: "Username is taken", available: false });
+    return res.json({
+      id: user._id,
+      username: user.username,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error("Get user error:", error);
+    return res.status(500).json({ message: "Failed to get user" });
   }
-  
-  return res.status(200).json({ message: "Username available", available: true });
 };

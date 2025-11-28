@@ -1,13 +1,11 @@
 import React from "react";
-import axios from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { credentialsSchema } from "./credentialsSchema";
+import { authAPI } from "../../services/api";
 import { LuUser, LuLock, LuArrowRight, LuLoader } from "react-icons/lu";
 import SignupCard from "./SignupCard";
-import Button from "./Button";
-import Input from "./Input";
-import Label from "./Label";
+import { Button, Input, Label } from "../../form_ui";
 import "./ExpertSignupForm.css";
 
 function SignupCredentials({ onNext }) {
@@ -16,7 +14,6 @@ function SignupCredentials({ onNext }) {
     handleSubmit,
     trigger,
     setError,
-    clearErrors,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(credentialsSchema),
@@ -25,46 +22,49 @@ function SignupCredentials({ onNext }) {
 
   const usernameRegister = register("username");
 
-  // Keep your blur handler for visual feedback
+  // Check username availability on blur for instant feedback
   const handleUsernameBlur = async (e) => {
-    const value = e.target.value;
+    const value = e.target.value.trim();
     await usernameRegister.onBlur(e);
-    const isFormatValid = await trigger("username");
     
-    if (isFormatValid && value) {
-      try {
-        await axios.post("http://localhost:5000/api/auth/check-username", { username: value });
-      } catch (error) {
-        if (error.response && error.response.status === 409) {
-          setError("username", { 
-            type: "manual", 
-            message: "This username is already taken" 
-          });
-        }
+    const isFormatValid = await trigger("username");
+    if (!isFormatValid || !value) return;
+
+    try {
+      await authAPI.checkUsername(value);
+      // Username is available - no action needed
+    } catch (error) {
+      if (error.response?.status === 409) {
+        setError("username", {
+          type: "manual",
+          message: "This username is already taken",
+        });
       }
     }
   };
 
-  // --- KEY FIX: Perform Final Check in onSubmit ---
+  // Final validation before moving to step 2
   const onSubmit = async (data) => {
     try {
-      // 1. Final server-side validation before moving to Step 2
-      await axios.post("http://localhost:5000/api/auth/check-username", { 
-        username: data.username 
+      // Server-side validation
+      await authAPI.checkUsername(data.username);
+      
+      // Success - pass credentials to parent
+      onNext({
+        username: data.username.trim(),
+        password: data.password,
       });
-      
-      // 2. If successful (no error thrown), proceed
-      onNext(data);
-      
     } catch (error) {
-      // 3. If error, block progress and show message
-      if (error.response && error.response.status === 409) {
-        setError("username", { 
-          type: "manual", 
-          message: "This username is already taken" 
+      if (error.response?.status === 409) {
+        setError("username", {
+          type: "manual",
+          message: "This username is already taken",
         });
       } else {
-        console.error("Validation error:", error);
+        setError("root", {
+          type: "manual",
+          message: "Something went wrong. Please try again.",
+        });
       }
     }
   };
@@ -79,9 +79,7 @@ function SignupCredentials({ onNext }) {
       </div>
 
       <div className="signup-card-content">
-        {/* Note: handleSubmit is async-aware, so it waits for our async onSubmit */}
         <form onSubmit={handleSubmit(onSubmit)} className="expert-form">
-          
           <div className="form-group">
             <Label htmlFor="username">
               <LuUser className="label-icon" />
@@ -92,6 +90,7 @@ function SignupCredentials({ onNext }) {
               {...usernameRegister}
               onBlur={handleUsernameBlur}
               placeholder="Choose a unique username"
+              autoComplete="username"
             />
             {errors.username && (
               <p className="error-message">{errors.username.message}</p>
@@ -108,11 +107,18 @@ function SignupCredentials({ onNext }) {
               type="password"
               {...register("password")}
               placeholder="Create a strong password"
+              autoComplete="new-password"
             />
             {errors.password && (
               <p className="error-message">{errors.password.message}</p>
             )}
           </div>
+
+          {errors.root && (
+            <p className="error-message" style={{ textAlign: "center" }}>
+              {errors.root.message}
+            </p>
+          )}
 
           <Button
             type="submit"

@@ -2,10 +2,10 @@ import React from "react";
 import "./ExpDifference.css"
 import ArrowForwardOutlinedIcon from "@mui/icons-material/ArrowForwardOutlined";
 import PlayCircleOutlinedIcon from '@mui/icons-material/PlayCircleOutlined';
-import { useSignup } from "../../context/SignupContext"; // 1. Import context
+import { useAuth } from "../../context/AuthContext";
 
 function ExpDiffernce() {
-    const { openSignup } = useSignup(); // 2. Get the function
+    const { openSignup } = useAuth();
 
     return (
         <div className="container-fluid exp-diff-container">

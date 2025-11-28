@@ -3,27 +3,33 @@ import axios from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { expertValidationSchema } from "./expertValidationSchema";
-import {  LuUpload, LuUser, LuBriefcase, LuMapPin,LuCalendar,LuFileText,LuStar,LuDollarSign,LuLoader,} from "react-icons/lu";
-import { useSignup } from "../../context/SignupContext";
-import SignupCard from "./SignupCard";
-import Button from "./Button";
-import Input from "./Input";
-import Label from "./Label";
-import Textarea from "./Textarea";
-import "./ExpertSignupForm.css";
+import { authAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import {
+  LuUpload,
+  LuUser,
+  LuBriefcase,
+  LuMapPin,
+  LuCalendar,
+  LuFileText,
+  LuDollarSign,
+  LuLoader,
+  LuArrowLeft,
+} from "react-icons/lu";
+import SignupCard from "./SignupCard";
+import { Button, Input, Label, Textarea } from "../../form_ui";
+import "./ExpertSignupForm.css";
 
-// Accepted props: userId (from Step 1)
-function ExpertSignupForm({ credentials }) {
-  const { closeSignup } = useSignup();
-  const { login } = useAuth();
-  const CLOUD_NAME = "durgw6vpo";
-  const UPLOAD_PRESET = "expert_profile_images";
+// Cloudinary config
+const CLOUD_NAME = "durgw6vpo";
+const UPLOAD_PRESET = "expert_profile_images";
 
+function ExpertSignupForm({ credentials, onBack }) {
+  const { closeSignup, setAuthUser } = useAuth();
+  
   const [previewImage, setPreviewImage] = useState(null);
   const [uploading, setUploading] = useState(false);
-
-  
+  const [submitError, setSubmitError] = useState("");
 
   const {
     register,
@@ -34,61 +40,69 @@ function ExpertSignupForm({ credentials }) {
     resolver: zodResolver(expertValidationSchema),
   });
 
+  // Upload image to Cloudinary
   const uploadToCloudinary = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setPreviewImage(URL.createObjectURL(file));
-    const data = new FormData();
-    data.append("file", file);
-    data.append("upload_preset", UPLOAD_PRESET);
+    
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", UPLOAD_PRESET);
 
     try {
       setUploading(true);
       const res = await axios.post(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,data,{withCredentials:false}
+        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+        formData,
+        { withCredentials: false } // Don't send cookies to Cloudinary
       );
-      // Success: Set the URL
       setValue("img", res.data.secure_url, { shouldValidate: true });
     } catch (err) {
-      // Failure: Clear the URL and inform the user
-      console.error("upload error ",err);
-      alert("Image upload failed"); //
-      setValue("img", "", { shouldValidate: true }); // <--- CRITICAL: Reset value
+      console.error("Upload error:", err);
+      setSubmitError("Image upload failed. Please try again.");
+      setValue("img", "", { shouldValidate: true });
+      setPreviewImage(null);
     } finally {
       setUploading(false);
     }
   };
 
-const onSubmit = async (data) => {
+  const onSubmit = async (data) => {
+    setSubmitError("");
+    
     try {
-      const combinedData = {
+      // Combine credentials with expert profile data
+      const payload = {
         username: credentials.username,
         password: credentials.password,
         ...data,
       };
 
-      // 1. Register User (Backend sets cookies)
-      await axios.post("http://localhost:5000/api/auth/expert-register", combinedData);
+      // Register expert - backend sets JWT cookies
+      const response = await authAPI.registerExpert(payload);
 
-      alert("Expert Profile Created Successfully!");
-      
-      // 2. Auto-Login locally
-      const newUser = { username: credentials.username, role: 'expert' };
-      login(newUser); // Redirects to /experts via Context
-      
-      // 3. Close Modal
+      // Set user in context (cookies already set by backend)
+      setAuthUser({
+        username: credentials.username,
+        role: "expert",
+      });
+
+      // Close modal - navigation happens via AuthContext
       closeSignup();
-
+      
+      // Optionally redirect
+      window.location.href = "/experts";
+      
     } catch (error) {
-      alert(error.response?.data?.message || "Profile creation failed.");
+      const message = error.response?.data?.message || "Registration failed. Please try again.";
+      setSubmitError(message);
     }
   };
-  
+
   return (
     <SignupCard className="signup-card-step-2">
-
-      
       <div className="signup-card-header">
         <h1 className="signup-card-title">Expert Profile</h1>
         <p className="signup-card-description">
@@ -111,7 +125,7 @@ const onSubmit = async (data) => {
                     <img
                       src={previewImage}
                       className="preview-image"
-                      alt="preview"
+                      alt="Preview"
                     />
                     <div className="preview-overlay" />
                   </div>
@@ -122,10 +136,10 @@ const onSubmit = async (data) => {
                 )}
               </div>
               <div className="upload-input-wrapper">
-                <Input
+                <input
                   id="image-upload"
                   type="file"
-                  className="file-input"
+                  className="input file-input"
                   onChange={uploadToCloudinary}
                   accept="image/*"
                 />
@@ -218,49 +232,56 @@ const onSubmit = async (data) => {
             )}
           </div>
 
-          {/* RATING & PRICING */}
-          <div className="form-row">
-            {/* <div className="form-group">
-              <Label htmlFor="rating"><LuStar className="label-icon" /> Rating (Optional)</Label>
-              <Input 
-                id="rating" 
-                type="number" 
-                step="0.1" 
-                {...register("rating", { valueAsNumber: true })} 
-                placeholder="0.0 - 5.0" 
-              />
-            </div> */}
-            <div className="form-group">
-              <Label htmlFor="pricing">
-                <LuDollarSign className="label-icon" /> Pricing ($/hr)
-              </Label>
-              <Input
-                id="pricing"
-                type="number"
-                {...register("pricing", { valueAsNumber: true })}
-                placeholder="Hourly rate"
-              />
-              {errors.pricing && (
-                <p className="error-message">{errors.pricing.message}</p>
-              )}
-            </div>
+          {/* PRICING */}
+          <div className="form-group">
+            <Label htmlFor="pricing">
+              <LuDollarSign className="label-icon" /> Pricing ($/hr)
+            </Label>
+            <Input
+              id="pricing"
+              type="number"
+              {...register("pricing", { valueAsNumber: true })}
+              placeholder="Hourly rate"
+            />
+            {errors.pricing && (
+              <p className="error-message">{errors.pricing.message}</p>
+            )}
           </div>
 
-          {/* SUBMIT BUTTON */}
-          <Button
-            type="submit"
-            className="submit-button"
-            disabled={isSubmitting || uploading}
-          >
-            {isSubmitting ? (
-              <>
-                <LuLoader className="button-icon spinner" />
-                Finalizing Profile...
-              </>
-            ) : (
-              "Create Expert Profile"
-            )}
-          </Button>
+          {/* ERROR MESSAGE */}
+          {submitError && (
+            <p className="error-message" style={{ textAlign: "center" }}>
+              {submitError}
+            </p>
+          )}
+
+          {/* BUTTONS */}
+          <div className="form-buttons" style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
+            <Button
+              type="button"
+              className="back-button"
+              onClick={onBack}
+              style={{ flex: 1, background: "#6b7280" }}
+            >
+              <LuArrowLeft /> Back
+            </Button>
+            
+            <Button
+              type="submit"
+              className="submit-button"
+              disabled={isSubmitting || uploading}
+              style={{ flex: 2 }}
+            >
+              {isSubmitting ? (
+                <>
+                  <LuLoader className="button-icon spinner" />
+                  Creating Profile...
+                </>
+              ) : (
+                "Create Expert Profile"
+              )}
+            </Button>
+          </div>
         </form>
       </div>
     </SignupCard>
