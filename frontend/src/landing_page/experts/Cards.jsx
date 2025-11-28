@@ -121,6 +121,7 @@ function Cards({ selectedIndustry = "All Categories", searchQuery = "", sortOpti
       {filteredAndSortedExperts.map((el, idx) => (
         <ExpertCard
           key={el._id || el.id || `expert-${idx}`}
+          expertId={el._id || el.id}
           img={el.img}                     // Cloudinary image URL from MongoDB
           name={el.name}
           rating={el.rating}

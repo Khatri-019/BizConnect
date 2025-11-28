@@ -32,7 +32,8 @@ api.interceptors.response.use(
         await api.post("/auth/refresh");
         return api(originalRequest);
       } catch (refreshError) {
-        // Refresh failed - user needs to login again
+        // Refresh failed - redirect to login
+        window.location.href = "http://localhost:5173";
         return Promise.reject(refreshError);
       }
     }
@@ -44,67 +45,9 @@ api.interceptors.response.use(
 // ============ AUTH API ============
 
 export const authAPI = {
-  // Check if username is available
-  checkUsername: async (username) => {
-    const response = await api.post("/auth/check-username", { username });
-    return response.data;
-  },
-
-  // Register expert (combines user + expert profile)
-  registerExpert: async (data) => {
-    const response = await api.post("/auth/expert-register", data);
-    return response.data;
-  },
-
-  // Login user
-  login: async (credentials) => {
-    const response = await api.post("/auth/login", credentials);
-    return response.data;
-  },
-
-  // Logout user
-  logout: async () => {
-    const response = await api.post("/auth/logout");
-    return response.data;
-  },
-
   // Get current user from token
   getCurrentUser: async () => {
     const response = await api.get("/auth/me");
-    return response.data;
-  },
-
-  // Refresh access token
-  refreshToken: async () => {
-    const response = await api.post("/auth/refresh");
-    return response.data;
-  },
-};
-
-// ============ EXPERTS API ============
-
-export const expertsAPI = {
-  // Get all experts
-  getAll: async () => {
-    const response = await api.get("/experts");
-    return response.data;
-  },
-
-  // Get expert by ID
-  getById: async (id) => {
-    const response = await api.get(`/experts/${id}`);
-    return response.data;
-  },
-
-  // Update expert profile
-  updateProfile: async (id, data) => {
-    const response = await api.put(`/experts/${id}`, data);
-    return response.data;
-  },
-
-  // Delete expert profile (deletes user, expert, and Cloudinary image)
-  deleteProfile: async (id) => {
-    const response = await api.delete(`/experts/${id}/profile`);
     return response.data;
   },
 };
@@ -121,6 +64,12 @@ export const chatAPI = {
   // Get all conversations for logged-in user
   getConversations: async () => {
     const response = await api.get("/chat/conversations");
+    return response.data;
+  },
+
+  // Get a single conversation by ID
+  getConversationById: async (conversationId) => {
+    const response = await api.get(`/chat/conversations/${conversationId}`);
     return response.data;
   },
 
@@ -147,8 +96,37 @@ export const chatAPI = {
     });
     return response.data;
   },
+
+  // Update language preference for conversation
+  updateLanguagePreference: async (conversationId, preferredLanguage) => {
+    const response = await api.put(`/chat/conversations/${conversationId}/language`, {
+      preferredLanguage,
+    });
+    return response.data;
+  },
+
+  // Delete all conversations and messages
+  deleteAllConversations: async () => {
+    const response = await api.delete("/chat/conversations/all");
+    return response.data;
+  },
 };
 
-// Export the axios instance for custom requests
+// ============ ACTIVE USERS API ============
+
+export const activeUsersAPI = {
+  // Ping to update user activity
+  ping: async (conversationId) => {
+    const response = await api.post("/active/ping", { conversationId });
+    return response.data;
+  },
+
+  // Check if user is active in conversation
+  checkActive: async (userId, conversationId) => {
+    const response = await api.get(`/active/${userId}/active/${conversationId}`);
+    return response.data;
+  },
+};
+
 export default api;
 

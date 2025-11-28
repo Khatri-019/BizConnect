@@ -1,10 +1,47 @@
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import StarRoundedIcon from "@mui/icons-material/StarRounded";
 import CalendarTodayRoundedIcon from "@mui/icons-material/CalendarTodayRounded";
 import FiberManualRecordRoundedIcon from "@mui/icons-material/FiberManualRecordRounded";
 import LocationPinIcon from "@mui/icons-material/LocationPin";
+import { useAuth } from "../../context/AuthContext";
+import { chatAPI } from "../../services/api";
 import "./ExpertCard.css";
 
-function ExpertCard({img,name,industry,rating,experienceYears,location,description}) {
+function ExpertCard({expertId, img, name, industry, rating, experienceYears, location, description}) {
+    const { user, openLogin } = useAuth();
+    const navigate = useNavigate();
+
+    const handleBookCall = async () => {
+        // Check if user is logged in
+        if (!user) {
+            alert("Please login to book a call with an expert.");
+            openLogin();
+            return;
+        }
+
+        try {
+            // Create or get conversation with expert
+            const conversation = await chatAPI.createConversation(expertId);
+            
+            // Ensure conversation ID is available
+            const convId = conversation._id || conversation.id;
+            if (!convId) {
+                throw new Error("Failed to get conversation ID");
+            }
+            
+            // Small delay to ensure conversation is saved in database
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Redirect to chat-dashboard with conversation ID
+            window.location.href = `http://localhost:5174?conversationId=${convId}`;
+        } catch (error) {
+            console.error("Error booking call:", error);
+            const message = error.response?.data?.message || "Failed to book a call. Please try again.";
+            alert(message);
+        }
+    };
+
     return (
         <div class="card expert-card">
             <div class="img-container">
@@ -41,7 +78,7 @@ function ExpertCard({img,name,industry,rating,experienceYears,location,descripti
                     {description}
                 </p>
 
-                <button class="btn btn-dark secondary ">
+                <button class="btn btn-dark secondary" onClick={handleBookCall}>
                     <span>
                         <CalendarTodayRoundedIcon sx={{ marginRight: "0.7rem" }} />
                     </span>

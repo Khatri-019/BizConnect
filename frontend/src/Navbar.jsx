@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import DuoIcon from "@mui/icons-material/Duo";
+import ChatIcon from "@mui/icons-material/Chat";
 import { useAuth } from "./context/AuthContext";
 import UserMenu from "./components/UserMenu";
 import ProfileModal from "./components/ProfileModal";
@@ -100,13 +101,24 @@ function Navbar() {
 
             <div className="d-flex align-items-center right-links">
               {user ? (
-                // LOGGED IN VIEW - Show UserMenu badge
-                <UserMenu
-                  onViewProfile={handleViewProfile}
-                  onEditProfile={handleEditProfile}
-                  onDeleteProfile={handleDeleteProfile}
-                  onLogout={logout}
-                />
+                // LOGGED IN VIEW - Show UserMenu badge and Chat Dashboard link
+                <>
+                  <button
+                    className="btn btn-outline-primary me-3"
+                    style={{ fontSize: "1.4rem" }}
+                    onClick={() => window.location.href = "http://localhost:5174"}
+                    title="Go to Chat Dashboard"
+                  >
+                    <ChatIcon sx={{ marginRight: "0.5rem" }} />
+                    Chat Dashboard
+                  </button>
+                  <UserMenu
+                    onViewProfile={handleViewProfile}
+                    onEditProfile={handleEditProfile}
+                    onDeleteProfile={handleDeleteProfile}
+                    onLogout={logout}
+                  />
+                </>
               ) : (
                 // LOGGED OUT VIEW
                 <>

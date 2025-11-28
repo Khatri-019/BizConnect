@@ -9,14 +9,18 @@ function RecentConversations() {
 
   return (
     <div className="recent-conversations">
-      {conversations.map((conv) => (
-        <ConversationItem
-          key={conv.id}
-          conversation={conv}
-          isActive={conv.id === selectedId}
-          onSelect={() => selectConversation(conv.id)}
-        />
-      ))}
+      {conversations.map((conv) => {
+        // Ensure we have a stable, unique key
+        const convId = conv.id || conv._id || `conv-${Math.random()}`;
+        return (
+          <ConversationItem
+            key={convId}
+            conversation={conv}
+            isActive={convId === selectedId}
+            onSelect={() => selectConversation(convId)}
+          />
+        );
+      })}
     </div>
   );
 }

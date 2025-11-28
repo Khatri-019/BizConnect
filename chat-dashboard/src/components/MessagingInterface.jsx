@@ -4,14 +4,20 @@ import { useConversations } from '../contexts/ConversationsProvider';
 import './MessagingInterface.css';
 
 const MessagingInterface = () => {
+    const { loading } = useConversations();
 
-    const {conversations, selectedId} = useConversations();
-    const activeConversation = conversations.find(c => c.id === selectedId) ?? null;
+    if (loading) {
+        return (
+            <div className="messaging-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <p>Loading conversations...</p>
+            </div>
+        );
+    }
 
     return (
         <div className="messaging-container">
             <LeftPanel/>
-            <RightPanel conversation={activeConversation} />
+            <RightPanel />
         </div>
     );
 };
