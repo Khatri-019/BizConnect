@@ -95,6 +95,18 @@ export const expertsAPI = {
     const response = await api.get(`/experts/${id}`);
     return response.data;
   },
+
+  // Update expert profile
+  updateProfile: async (id, data) => {
+    const response = await api.put(`/experts/${id}`, data);
+    return response.data;
+  },
+
+  // Delete expert profile (deletes user, expert, and Cloudinary image)
+  deleteProfile: async (id) => {
+    const response = await api.delete(`/experts/${id}/profile`);
+    return response.data;
+  },
 };
 
 // Export the axios instance for custom requests

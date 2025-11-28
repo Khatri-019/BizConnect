@@ -1,22 +1,48 @@
-import React, { useState } from "react"; // 👈 Import useState
+import React, { useState, useEffect } from "react";
 import "./Hero.css";
 import CheckOutlinedIcon from '@mui/icons-material/CheckOutlined';
+import { UNIQUE_INDUSTRIES } from "../../utils/industries";
 
-
-
-function Hero() {
-    const categories = ["All Categories", "Business Strategy", "Technology", "Marketing", "Finance"];
-    const [selectedCategory, setSelectedCategory] = useState("All Categories");
+function Hero({ selectedIndustry, onIndustryChange, searchQuery, onSearchChange, sortOption, onSortChange }) {
+    // Add "All Categories" at the beginning of the industries list
+    const categories = ["All Categories", ...UNIQUE_INDUSTRIES];
+    const [localSelectedCategory, setLocalSelectedCategory] = useState(selectedIndustry || "All Categories");
 
     const ratings = ["Highest Rated", "Most Relevant", "Newest"];
-    const [selectedRating, setSelectedRating] = useState("Highest Rated");
+    const [localSelectedRating, setLocalSelectedRating] = useState(sortOption || "Highest Rated");
+
+    // Sync with parent component
+    useEffect(() => {
+        if (selectedIndustry) {
+            setLocalSelectedCategory(selectedIndustry);
+        }
+    }, [selectedIndustry]);
+
+    useEffect(() => {
+        if (sortOption) {
+            setLocalSelectedRating(sortOption);
+        }
+    }, [sortOption]);
 
     const handleCategorySelect = (category) => {
-        setSelectedCategory(category);
+        setLocalSelectedCategory(category);
+        if (onIndustryChange) {
+            onIndustryChange(category);
+        }
     };
 
     const handleRatingSelect = (rating) => {
-        setSelectedRating(rating);
+        setLocalSelectedRating(rating);
+        if (onSortChange) {
+            onSortChange(rating);
+        }
+    };
+
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        if (onSearchChange) {
+            onSearchChange(value);
+        }
     };
 
 
@@ -35,6 +61,8 @@ function Hero() {
                                 className="form-control"
                                 placeholder="Search by name, expertise, or skills..."
                                 aria-label="Search for an expert"
+                                value={searchQuery || ""}
+                                onChange={handleSearchChange}
                             />
                         </div>
 
@@ -44,8 +72,11 @@ function Hero() {
                                 type="button"
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
+                                title={localSelectedCategory}
                             >
-                                {selectedCategory}
+                                <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                                    {localSelectedCategory}
+                                </span>
                             </button>
                             <ul className="dropdown-menu">
                                 {categories.map((category) => (
@@ -55,9 +86,13 @@ function Hero() {
                                             type="button"
                                             onClick={() => handleCategorySelect(category)}
                                         >
-                                            {category}
+                                            <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                {category}
+                                            </span>
                                             {/* Conditionally render the checkmark */}
-                                            {selectedCategory === category && <CheckOutlinedIcon sx={{color:"green"}} />}
+                                            {localSelectedCategory === category && (
+                                                <CheckOutlinedIcon sx={{ color: "green", flexShrink: 0, marginLeft: "0.5rem" }} />
+                                            )}
                                         </button>
                                     </li>
                                 ))}
@@ -65,12 +100,12 @@ function Hero() {
                         </div>
                         <div className="dropdown">
                             <button
-                                className="btn dropdown-toggle   custom-dropdown-toggle"
+                                className="btn dropdown-toggle custom-dropdown-toggle"
                                 type="button"
                                 data-bs-toggle="dropdown"
                                 aria-expanded="false"
                             >
-                                {selectedRating}
+                                {localSelectedRating}
                             </button>
                             <ul className="dropdown-menu">
                                 {ratings.map((rating) => (
@@ -80,8 +115,12 @@ function Hero() {
                                             type="button"
                                             onClick={() => handleRatingSelect(rating)}
                                         >
-                                            {rating}
-                                            {selectedRating === rating && <CheckOutlinedIcon sx={{color:"green"}} />}
+                                            <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                {rating}
+                                            </span>
+                                            {localSelectedRating === rating && (
+                                                <CheckOutlinedIcon sx={{ color: "green", flexShrink: 0, marginLeft: "0.5rem" }} />
+                                            )}
                                         </button>
                                     </li>
                                 ))}

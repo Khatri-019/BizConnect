@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { expertValidationSchema } from "./expertValidationSchema";
-import { authAPI } from "../../services/api";
+import { authAPI, expertsAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 import {
   LuUpload,
@@ -24,21 +24,55 @@ import "./ExpertSignupForm.css";
 const CLOUD_NAME = "durgw6vpo";
 const UPLOAD_PRESET = "expert_profile_images";
 
-function ExpertSignupForm({ credentials, onBack }) {
-  const { closeSignup, setAuthUser } = useAuth();
+function ExpertSignupForm({ credentials, onBack, mode = "signup", onCancel, onSuccess }) {
+  const { closeSignup, setAuthUser, user } = useAuth();
+  const isEditMode = mode === "edit";
   
   const [previewImage, setPreviewImage] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [submitError, setSubmitError] = useState("");
+  const [loadingProfile, setLoadingProfile] = useState(isEditMode);
 
   const {
     register,
     handleSubmit,
     setValue,
+    reset,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(expertValidationSchema),
   });
+
+  const imgValue = watch("img"); // Watch the img field value
+
+  // Load existing profile data when in edit mode
+  useEffect(() => {
+    if (isEditMode && user?.id) {
+      const loadProfile = async () => {
+        try {
+          const profile = await expertsAPI.getById(user.id);
+          // Pre-fill form with existing data
+          reset({
+            name: profile.name || "",
+            industry: profile.industry || "",
+            location: profile.location || "",
+            experienceYears: profile.experienceYears || 0,
+            description: profile.description || "",
+            pricing: profile.pricing || 0,
+            img: profile.img || "",
+          });
+          setPreviewImage(profile.img || null);
+        } catch (error) {
+          console.error("Failed to load profile:", error);
+          setSubmitError("Failed to load profile data.");
+        } finally {
+          setLoadingProfile(false);
+        }
+      };
+      loadProfile();
+    }
+  }, [isEditMode, user, reset]);
 
   // Upload image to Cloudinary
   const uploadToCloudinary = async (e) => {
@@ -73,40 +107,61 @@ function ExpertSignupForm({ credentials, onBack }) {
     setSubmitError("");
     
     try {
-      // Combine credentials with expert profile data
-      const payload = {
-        username: credentials.username,
-        password: credentials.password,
-        ...data,
-      };
+      if (isEditMode) {
+        // Update existing profile
+        await expertsAPI.updateProfile(user.id, data);
+        
+        if (onSuccess) {
+          onSuccess();
+        }
+      } else {
+        // Register new expert
+        const payload = {
+          username: credentials.username,
+          password: credentials.password,
+          ...data,
+        };
 
-      // Register expert - backend sets JWT cookies
-      const response = await authAPI.registerExpert(payload);
+        // Register expert - backend sets JWT cookies
+        const response = await authAPI.registerExpert(payload);
 
-      // Set user in context (cookies already set by backend)
-      setAuthUser({
-        username: credentials.username,
-        role: "expert",
-      });
+        // Set user in context (cookies already set by backend)
+        setAuthUser({
+          username: credentials.username,
+          role: "expert",
+        });
 
-      // Close modal - navigation happens via AuthContext
-      closeSignup();
-      
-      // Optionally redirect
-      window.location.href = "/experts";
-      
+        // Close modal - navigation happens via AuthContext
+        closeSignup();
+        
+        // Optionally redirect
+        window.location.href = "/experts";
+      }
     } catch (error) {
-      const message = error.response?.data?.message || "Registration failed. Please try again.";
+      const message = error.response?.data?.message || 
+        (isEditMode ? "Failed to update profile. Please try again." : "Registration failed. Please try again.");
       setSubmitError(message);
     }
   };
 
+  if (loadingProfile) {
+    return (
+      <SignupCard className="signup-card-step-2">
+        <div className="signup-card-content">
+          <p style={{ textAlign: "center", fontSize: "1.6rem" }}>Loading profile...</p>
+        </div>
+      </SignupCard>
+    );
+  }
+
   return (
     <SignupCard className="signup-card-step-2">
       <div className="signup-card-header">
-        <h1 className="signup-card-title">Expert Profile</h1>
+        <h1 className="signup-card-title">{isEditMode ? "Edit Expert Profile" : "Expert Profile"}</h1>
         <p className="signup-card-description">
-          Tell us more about your expertise to get listed.
+          {isEditMode 
+            ? "Update your expert profile information."
+            : "Tell us more about your expertise to get listed."}
         </p>
       </div>
 
@@ -120,10 +175,10 @@ function ExpertSignupForm({ credentials, onBack }) {
             </Label>
             <div className="image-upload-section">
               <div className="preview-container">
-                {previewImage ? (
+                {(previewImage || imgValue) ? (
                   <div className="preview-image-wrapper">
                     <img
-                      src={previewImage}
+                      src={previewImage || imgValue}
                       className="preview-image"
                       alt="Preview"
                     />
@@ -257,30 +312,59 @@ function ExpertSignupForm({ credentials, onBack }) {
 
           {/* BUTTONS */}
           <div className="form-buttons" style={{ display: "flex", gap: "1rem", marginTop: "1rem" }}>
-            <Button
-              type="button"
-              className="back-button"
-              onClick={onBack}
-              style={{ flex: 1, background: "#6b7280" }}
-            >
-              <LuArrowLeft /> Back
-            </Button>
-            
-            <Button
-              type="submit"
-              className="submit-button"
-              disabled={isSubmitting || uploading}
-              style={{ flex: 2 }}
-            >
-              {isSubmitting ? (
-                <>
-                  <LuLoader className="button-icon spinner" />
-                  Creating Profile...
-                </>
-              ) : (
-                "Create Expert Profile"
-              )}
-            </Button>
+            {isEditMode ? (
+              <>
+                <Button
+                  type="button"
+                  className="back-button"
+                  onClick={onCancel}
+                  style={{ flex: 1, background: "#6b7280" }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  className="submit-button"
+                  disabled={isSubmitting || uploading}
+                  style={{ flex: 2 }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <LuLoader className="button-icon spinner" />
+                      Updating Profile...
+                    </>
+                  ) : (
+                    "Update Profile"
+                  )}
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  type="button"
+                  className="back-button"
+                  onClick={onBack}
+                  style={{ flex: 1, background: "#6b7280" }}
+                >
+                  <LuArrowLeft /> Back
+                </Button>
+                <Button
+                  type="submit"
+                  className="submit-button"
+                  disabled={isSubmitting || uploading}
+                  style={{ flex: 2 }}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <LuLoader className="button-icon spinner" />
+                      Creating Profile...
+                    </>
+                  ) : (
+                    "Create Expert Profile"
+                  )}
+                </Button>
+              </>
+            )}
           </div>
         </form>
       </div>
