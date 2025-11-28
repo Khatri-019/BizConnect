@@ -472,8 +472,9 @@ router.post("/conversations/:conversationId/messages", protect, async (req, res)
     const receiverLanguage = freshOtherParticipant?.preferredLanguage;
     const senderLanguage = freshParticipant?.preferredLanguage || originalLanguage;
     
-    // Translate if receiver has a language preference set (and it's not "en" or empty)
-    if (receiverLanguage && receiverLanguage !== "en" && receiverLanguage.trim() !== "") {
+    // Translate if receiver has a language preference set (including "en" if message is not in English)
+    // This allows translation TO English from other languages
+    if (receiverLanguage && receiverLanguage.trim() !== "") {
       
       // Always attempt translation if receiver has a language preference
       // Special handling for transliterated text (e.g., "aap kaise ho" in English script is Hindi):
@@ -495,6 +496,12 @@ router.post("/conversations/:conversationId/messages", protect, async (req, res)
           console.log(`[Translation] Text detected as English but receiver prefers ${receiverLanguage}. Using auto-detection for possible transliterated text.`);
           sourceLanguageForTranslation = "auto"; // Let Google Translate auto-detect for transliterated text
         }
+        // Special case: If receiver wants English but message is in another language - translate to English
+        else if (receiverLanguage === "en" && originalLanguage !== "en") {
+          console.log(`[Translation] Message is in ${originalLanguage}, translating to English for receiver`);
+          shouldTranslate = true;
+          sourceLanguageForTranslation = originalLanguage; // Use detected language as source
+        }
         // If sender has a preferred language that's different, use it as a hint
         else if (senderLanguage && senderLanguage !== "en" && senderLanguage !== receiverLanguage && senderLanguage !== originalLanguage) {
           console.log(`[Translation] Sender prefers ${senderLanguage}, using it as source language hint`);
@@ -502,8 +509,8 @@ router.post("/conversations/:conversationId/messages", protect, async (req, res)
         }
       }
       // Case 2: Detected as same as receiver, but sender has different preference
-      // This might be transliterated text, attempt translation anyway
-      else if (senderLanguage && senderLanguage !== receiverLanguage && senderLanguage !== "en") {
+      // This might be transliterated text, attempt translation anyway (unless both are English)
+      else if (senderLanguage && senderLanguage !== receiverLanguage && senderLanguage !== "en" && receiverLanguage !== "en") {
         console.log(`[Translation] Detected as ${originalLanguage} but sender prefers ${senderLanguage}, attempting translation`);
         shouldTranslate = true;
         sourceLanguageForTranslation = senderLanguage; // Try using sender's preferred language
@@ -514,6 +521,12 @@ router.post("/conversations/:conversationId/messages", protect, async (req, res)
         console.log(`[Translation] Text detected as English but receiver prefers ${receiverLanguage}. Attempting translation for possible transliterated text.`);
         shouldTranslate = true;
         sourceLanguageForTranslation = "auto"; // Use auto-detection for transliterated text
+      }
+      // Case 4: Message is not in English but receiver wants English - translate to English
+      else if (originalLanguage !== "en" && receiverLanguage === "en") {
+        console.log(`[Translation] Message is in ${originalLanguage}, translating to English for receiver`);
+        shouldTranslate = true;
+        sourceLanguageForTranslation = originalLanguage;
       }
       
       if (shouldTranslate) {

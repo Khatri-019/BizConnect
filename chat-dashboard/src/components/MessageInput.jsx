@@ -17,21 +17,21 @@ const MessageInput = ({ conversationId }) => {
         setMessage('');
 
         try {
-            // Ensure language preference is set before sending first message
+            // CRITICAL: Ensure language preference is set BEFORE sending message
+            // This ensures first message is translated
             // Check for global preference first
             const globalLanguage = localStorage.getItem('global_language_pref');
             const conversationLanguage = localStorage.getItem(`language_pref_${conversationId}`);
             const languageToUse = globalLanguage || conversationLanguage || "en";
             
-            // Update language preference on backend if not already set
-            // This ensures first message is translated
-            if (languageToUse && languageToUse !== "en") {
-                try {
-                    await chatAPI.updateLanguagePreference(conversationId, languageToUse);
-                } catch (error) {
-                    console.error("Error setting language preference before sending:", error);
-                    // Continue anyway - backend will handle translation if preference is set
-                }
+            // Always update language preference on backend before sending
+            // This ensures the backend has the latest preference when processing the message
+            try {
+                await chatAPI.updateLanguagePreference(conversationId, languageToUse);
+                console.log(`[MessageInput] Set language preference to ${languageToUse} before sending message`);
+            } catch (error) {
+                console.error("Error setting language preference before sending:", error);
+                // Continue anyway - backend will handle translation if preference is set
             }
             
             // Translation is handled automatically on backend based on receiver's language preference
@@ -43,10 +43,10 @@ const MessageInput = ({ conversationId }) => {
                 senderId: sentMessage.senderId,
                 senderRole: sentMessage.senderRole,
                 content: sentMessage.content,
-                translatedContent: sentMessage.translatedContent || sentMessage.content,
-                isTranslated: sentMessage.isTranslated,
-                originalLanguage: sentMessage.originalLanguage,
-                translatedLanguage: sentMessage.translatedLanguage,
+                translatedContent: sentMessage.translatedContent || "", // Empty string if not translated
+                isTranslated: sentMessage.isTranslated || false, // Ensure boolean
+                originalLanguage: sentMessage.originalLanguage || "en",
+                translatedLanguage: sentMessage.translatedLanguage || "en",
                 createdAt: sentMessage.createdAt,
             });
         } catch (error) {

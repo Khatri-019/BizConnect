@@ -20,46 +20,51 @@ const RightPanel = () => {
     // IMPORTANT: Set language preference on backend immediately when conversation is selected
     // This ensures first message is translated
     useEffect(() => {
+        if (!selectedId) return;
+        
         // Check for global language preference (applies to all conversations)
         const globalLanguage = localStorage.getItem('global_language_pref');
         if (globalLanguage) {
             setTargetLanguage(globalLanguage);
             // CRITICAL: Update backend immediately and wait for it to complete
             // This ensures first message is translated
-            if (selectedId) {
-                chatAPI.updateLanguagePreference(selectedId, globalLanguage)
-                    .then(() => {
-                        console.log(`[Language] Set preference to ${globalLanguage} for conversation ${selectedId}`);
-                    })
-                    .catch(console.error);
-            }
+            chatAPI.updateLanguagePreference(selectedId, globalLanguage)
+                .then(() => {
+                    console.log(`[RightPanel] Set preference to ${globalLanguage} for conversation ${selectedId}`);
+                })
+                .catch(console.error);
             return;
         }
         
         // Fall back to conversation-specific preference
-        if (!selectedId) return;
-        
         const storedLanguage = localStorage.getItem(`language_pref_${selectedId}`);
         if (storedLanguage) {
             setTargetLanguage(storedLanguage);
             // CRITICAL: Update backend immediately
             chatAPI.updateLanguagePreference(selectedId, storedLanguage)
                 .then(() => {
-                    console.log(`[Language] Set preference to ${storedLanguage} for conversation ${selectedId}`);
+                    console.log(`[RightPanel] Set preference to ${storedLanguage} for conversation ${selectedId}`);
                 })
                 .catch(console.error);
         } else if (conversation?.myPreferredLanguage) {
             setTargetLanguage(conversation.myPreferredLanguage);
             localStorage.setItem(`language_pref_${selectedId}`, conversation.myPreferredLanguage);
+            // Update backend with conversation's preference
+            chatAPI.updateLanguagePreference(selectedId, conversation.myPreferredLanguage)
+                .then(() => {
+                    console.log(`[RightPanel] Set preference to ${conversation.myPreferredLanguage} from conversation for ${selectedId}`);
+                })
+                .catch(console.error);
         } else {
             // No preference set yet - set default to "en" but still update backend
             // This ensures the preference is set before first message
             const defaultLanguage = "en";
             setTargetLanguage(defaultLanguage);
-            if (selectedId) {
-                chatAPI.updateLanguagePreference(selectedId, defaultLanguage)
-                    .catch(console.error);
-            }
+            chatAPI.updateLanguagePreference(selectedId, defaultLanguage)
+                .then(() => {
+                    console.log(`[RightPanel] Set default preference to ${defaultLanguage} for conversation ${selectedId}`);
+                })
+                .catch(console.error);
         }
     }, [selectedId, conversation]);
 
@@ -156,13 +161,12 @@ const RightPanel = () => {
         );
     }
 
-    // Translation is always enabled when a language preference is set (not "en")
-    // The backend will automatically translate messages to the receiver's preferred language
-    // We show translation if:
-    // 1. User has set a language preference (not "en") - so incoming messages are translated
+    // Translation is enabled when:
+    // 1. User has set a language preference (including "en") - so incoming messages are translated to their preference
     // 2. Other user has a language preference - so we can show translated messages they receive
-    const translateEnabled = (targetLanguage && targetLanguage !== "en") || 
-                             (conversation.otherPreferredLanguage && conversation.otherPreferredLanguage !== "en");
+    // Translation works both ways: to English from other languages, and from English to other languages
+    const translateEnabled = (targetLanguage && targetLanguage.trim() !== "") || 
+                             (conversation.otherPreferredLanguage && conversation.otherPreferredLanguage.trim() !== "");
 
     return (
         <section className="right-panel">

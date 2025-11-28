@@ -129,10 +129,10 @@ export function ConversationsProvider({ children }) {
                 senderId: msg.senderId,
                 senderRole: msg.senderRole,
                 content: msg.content,
-                translatedContent: msg.translatedContent || msg.content,
-                isTranslated: msg.isTranslated,
-                originalLanguage: msg.originalLanguage,
-                translatedLanguage: msg.translatedLanguage,
+                translatedContent: msg.translatedContent || "", // Preserve translated content, empty string if not translated
+                isTranslated: msg.isTranslated || false, // Ensure boolean value
+                originalLanguage: msg.originalLanguage || "en",
+                translatedLanguage: msg.translatedLanguage || "en",
                 createdAt: msg.createdAt,
               })) }
             : c
@@ -211,10 +211,10 @@ export function ConversationsProvider({ children }) {
                   senderId: msg.senderId,
                   senderRole: msg.senderRole,
                   content: msg.content,
-                  translatedContent: msg.translatedContent || msg.content,
-                  isTranslated: msg.isTranslated,
-                  originalLanguage: msg.originalLanguage,
-                  translatedLanguage: msg.translatedLanguage,
+                  translatedContent: msg.translatedContent || "", // Preserve translated content, empty string if not translated
+                  isTranslated: msg.isTranslated || false, // Ensure boolean value
+                  originalLanguage: msg.originalLanguage || "en",
+                  translatedLanguage: msg.translatedLanguage || "en",
                   createdAt: msg.createdAt,
                 })),
                 lastMessage: messages.length > 0 ? messages[messages.length - 1].content : c.lastMessage,

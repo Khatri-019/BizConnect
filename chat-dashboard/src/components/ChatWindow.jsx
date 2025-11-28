@@ -12,13 +12,16 @@ const MessageBubble = ({ message, isOwnMessage, translateEnabled }) => {
         });
     };
 
-    // Show original content to sender, translated content to receiver (if available)
-    // Receiver should see translated content if it exists and is different from original
+    // Show original content to sender, translated content to receiver (if available and translation is enabled)
+    // Receiver should see translated content if:
+    // 1. Translation is enabled
+    // 2. Message has been translated (isTranslated is true)
+    // 3. Translated content exists and is not empty
     const displayContent = isOwnMessage 
         ? message.content  // Sender always sees original message
-        : (message.isTranslated && message.translatedContent && message.translatedContent.trim() !== "" 
-            ? message.translatedContent  // Receiver sees translated if available
-            : message.content);  // Fallback to original if no translation
+        : (translateEnabled && message.isTranslated && message.translatedContent && message.translatedContent.trim() !== "" 
+            ? message.translatedContent  // Receiver sees translated if available and translation is enabled
+            : message.content);  // Fallback to original if no translation or translation disabled
 
     return (
         <div className={`message-wrapper ${isOwnMessage ? 'sent' : 'received'}`}>
