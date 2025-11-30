@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import DuoIcon from "@mui/icons-material/Duo";
 import ChatIcon from "@mui/icons-material/Chat";
 import { useAuth } from "./context/AuthContext";
@@ -9,6 +10,7 @@ import "./Navbar.css";
 
 function Navbar() {
   const { user, logout, openSignup, openLogin, setAuthUser } = useAuth();
+  const location = useLocation(); // Get current route
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileView, setProfileView] = useState("profile"); // "profile" or "edit"
 
@@ -76,24 +78,36 @@ function Navbar() {
               {/* Show Home only when not logged in */}
               {!user && (
                 <li className="nav-item">
-                  <a className="nav-link my-link" href="/">
+                  <a 
+                    className={`nav-link my-link ${location.pathname === '/' ? 'active' : ''}`} 
+                    href="/"
+                  >
                     Home
                   </a>
                 </li>
               )}
 
               <li className="nav-item">
-                <a className="nav-link my-link" href="/experts">
+                <a 
+                  className={`nav-link my-link ${location.pathname === '/experts' ? 'active' : ''}`} 
+                  href="/experts"
+                >
                   Find Experts
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link my-link" href="/about">
+                <a 
+                  className={`nav-link my-link ${location.pathname === '/about' ? 'active' : ''}`} 
+                  href="/about"
+                >
                   About Us
                 </a>
               </li>
               <li className="nav-item">
-                <a className="nav-link my-link" href="/support">
+                <a 
+                  className={`nav-link my-link ${location.pathname === '/support' ? 'active' : ''}`} 
+                  href="/support"
+                >
                   Support
                 </a>
               </li>
