@@ -1,6 +1,6 @@
 .hero-container {
     
-    background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)), url('media/images/globe_image.png');
+    background-image: linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0)), url('/media/images/globe_image.png');
     min-height: 80vh; 
     background-size: cover;
     background-position: center;
