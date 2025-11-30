@@ -9,10 +9,14 @@ import {
 } from "../utils/token.js";
 
 // Cookie configuration
+// For production (HTTPS): use sameSite: "none" to allow cross-origin cookies
+// For development (HTTP): use sameSite: "lax" (secure must be false)
+const isProduction = process.env.NODE_ENV === "production";
 const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax", // "none" required for cross-origin cookies with secure: true
+  path: "/", // Explicitly set path to root - CRITICAL for cross-origin cookies
 };
 
 const ACCESS_TOKEN_MAX_AGE = 1000 * 60 * 15; // 15 minutes
@@ -52,6 +56,16 @@ const setAuthCookies = async (res, user) => {
     ...cookieOptions,
     maxAge: REFRESH_TOKEN_MAX_AGE,
   });
+
+  // Debug logging in production
+  if (process.env.NODE_ENV === "production") {
+    console.log("Cookies set with options:", {
+      httpOnly: cookieOptions.httpOnly,
+      secure: cookieOptions.secure,
+      sameSite: cookieOptions.sameSite,
+      path: cookieOptions.path,
+    });
+  }
 };
 
 // ============ CONTROLLERS ============
@@ -335,15 +349,27 @@ export const logout = async (req, res) => {
       }
     }
 
-    // Clear cookies
-    res.clearCookie("accessToken", cookieOptions);
-    res.clearCookie("refreshToken", cookieOptions);
+    // Clear cookies - MUST use same options as when setting them
+    res.clearCookie("accessToken", {
+      ...cookieOptions,
+      path: "/", // Explicitly set path when clearing
+    });
+    res.clearCookie("refreshToken", {
+      ...cookieOptions,
+      path: "/", // Explicitly set path when clearing
+    });
 
     return res.json({ message: "Logged out successfully" });
   } catch (error) {
     // Still clear cookies on error
-    res.clearCookie("accessToken", cookieOptions);
-    res.clearCookie("refreshToken", cookieOptions);
+    res.clearCookie("accessToken", {
+      ...cookieOptions,
+      path: "/",
+    });
+    res.clearCookie("refreshToken", {
+      ...cookieOptions,
+      path: "/",
+    });
     return res.json({ message: "Logged out" });
   }
 };

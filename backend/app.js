@@ -17,15 +17,21 @@ const PORT = process.env.PORT || 5000;
 
 // Build allowed origins - use env variables in production, localhost in development
 // NOTE: These should be the FRONTEND origin URLs (where requests come from), not API URLs
-const frontendOrigin = process.env.NODE_ENV === 'production' 
+const isProduction = process.env.NODE_ENV === 'production';
+const frontendOrigin = isProduction 
   ? process.env.FRONTEND_ORIGIN
   : 'http://localhost:5173';
   
-const chatDashboardOrigin = process.env.NODE_ENV === 'production' 
+const chatDashboardOrigin = isProduction 
   ? process.env.CHAT_DASHBOARD_ORIGIN 
   : 'http://localhost:5174';
 
 const allowedOrigins = [frontendOrigin, chatDashboardOrigin].filter(Boolean);
+
+// Log environment info for debugging
+console.log('Environment:', isProduction ? 'PRODUCTION' : 'DEVELOPMENT');
+console.log('Frontend Origin:', frontendOrigin || 'NOT SET');
+console.log('Chat Dashboard Origin:', chatDashboardOrigin || 'NOT SET');
 
 // Connect to MongoDB
 db.connectDB();
@@ -37,13 +43,22 @@ const app = express();
 app.use(cors({
   origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+    if (!origin) {
+      // No origin (e.g., Postman, mobile apps) - allow in development only
+      if (!isProduction) {
+        return callback(null, true);
+      }
+      return callback(new Error('CORS: No origin provided'));
+    }
+    
+    // Check if origin is in allowed list
+    if (allowedOrigins.indexOf(origin) !== -1) {
       callback(null, true);
     } else {
       // Log the blocked origin for debugging
-      console.log(`CORS blocked origin: ${origin}`);
-      console.log(`Allowed origins: ${allowedOrigins.join(', ')}`);
-      callback(new Error('Not allowed by CORS'));
+      console.error(`❌ CORS blocked origin: ${origin}`);
+      console.error(`✅ Allowed origins: ${allowedOrigins.join(', ') || 'NONE SET'}`);
+      callback(new Error(`CORS: Origin ${origin} not allowed`));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
