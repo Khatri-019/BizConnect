@@ -18,11 +18,11 @@ const PORT = process.env.PORT || 5000;
 // Build allowed origins - use env variables in production, localhost in development
 // NOTE: These should be the FRONTEND origin URLs (where requests come from), not API URLs
 const frontendOrigin = process.env.NODE_ENV === 'production' 
-  ? process.env.FRONTEND_ORIGIN || process.env.VITE_FRONTEND_API_URL
+  ? process.env.FRONTEND_ORIGIN
   : 'http://localhost:5173';
   
 const chatDashboardOrigin = process.env.NODE_ENV === 'production' 
-  ? process.env.CHAT_DASHBOARD_ORIGIN || process.env.VITE_CHAT_DASHBOARD_URL
+  ? process.env.CHAT_DASHBOARD_ORIGIN 
   : 'http://localhost:5174';
 
 const allowedOrigins = [frontendOrigin, chatDashboardOrigin].filter(Boolean);

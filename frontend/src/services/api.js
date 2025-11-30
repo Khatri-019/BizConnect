@@ -1,7 +1,9 @@
 import axios from "axios";
 
-// Base API configuration - use env variable or default to localhost for development
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// Base API configuration - use production URL in production, localhost in development
+// Similar to backend/app.js logic: if NODE_ENV=production use production links, else localhost
+const isProduction = import.meta.env.MODE === 'production';
+const API_BASE_URL = isProduction ? (import.meta.env.VITE_API_URL): "http://localhost:5000/api";
 
 // Create axios instance with defaults
 const api = axios.create({

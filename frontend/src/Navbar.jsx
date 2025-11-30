@@ -121,7 +121,10 @@ function Navbar() {
                     className="btn btn-outline-primary me-3"
                     style={{ fontSize: "1.4rem" }}
                     onClick={() => {
-                      const chatUrl = import.meta.env.VITE_CHAT_DASHBOARD_URL || "http://localhost:5174";
+                      // Use production URL in production, localhost in development
+                      // Similar to backend/app.js: if NODE_ENV=production use production links, else localhost
+                      const isProduction = import.meta.env.MODE === 'production';
+                      const chatUrl = isProduction? (import.meta.env.VITE_CHAT_DASHBOARD_URL): "http://localhost:5174";
                       window.location.href = chatUrl;
                     }}
                     title="Go to Chat Dashboard"

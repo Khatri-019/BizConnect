@@ -28,7 +28,10 @@ const TopBar = () => {
     }, [showMenu]);
 
     const handleBackToFrontend = () => {
-        const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
+        // Use production URL in production, localhost in development
+        // Similar to backend/app.js: if NODE_ENV=production use production links, else localhost
+        const isProduction = import.meta.env.MODE === 'production';
+        const frontendUrl = isProduction ? (import.meta.env.VITE_FRONTEND_URL) : "http://localhost:5173";
         window.location.href = frontendUrl;
     };
 
