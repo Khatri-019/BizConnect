@@ -11,7 +11,17 @@ import activeUsersRoutes from "./routes/activeUsers.js";
 import cookieParser from "cookie-parser";
 
 const PORT = process.env.PORT || 5000;
-const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174']; // frontend and chat-dashboard
+
+// Build allowed origins - use env variables in production, localhost in development
+const frontend = process.env.NODE_ENV === 'production' 
+  ? process.env.VITE_FRONTEND_API_URL 
+  : 'http://localhost:5173';
+  
+const chat_dashboard = process.env.NODE_ENV === 'production' 
+  ? process.env.VITE_CHAT_DASHBOARD_URL 
+  : 'http://localhost:5174';
+
+const allowedOrigins = [frontend, chat_dashboard].filter(Boolean); // frontend and chat-dashboard
 
 // Load environment variables from .env file
 dotenv.config();
