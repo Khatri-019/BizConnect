@@ -15,7 +15,8 @@ export function AuthProvider({ children }) {
       } catch (error) {
         // Not logged in - redirect to frontend
         if (error.response?.status === 401 || error.response?.status === 403) {
-          window.location.href = "http://localhost:5173";
+          const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
+          window.location.href = frontendUrl;
         }
         setUser(null);
       } finally {

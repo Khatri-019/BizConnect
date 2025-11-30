@@ -106,7 +106,10 @@ function Navbar() {
                   <button
                     className="btn btn-outline-primary me-3"
                     style={{ fontSize: "1.4rem" }}
-                    onClick={() => window.location.href = "http://localhost:5174"}
+                    onClick={() => {
+                      const chatUrl = import.meta.env.VITE_CHAT_DASHBOARD_URL || "http://localhost:5174";
+                      window.location.href = chatUrl;
+                    }}
                     title="Go to Chat Dashboard"
                   >
                     <ChatIcon sx={{ marginRight: "0.5rem" }} />

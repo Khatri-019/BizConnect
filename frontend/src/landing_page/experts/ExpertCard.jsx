@@ -34,7 +34,8 @@ function ExpertCard({expertId, img, name, industry, rating, experienceYears, loc
             await new Promise(resolve => setTimeout(resolve, 100));
             
             // Redirect to chat-dashboard with conversation ID
-            window.location.href = `http://localhost:5174?conversationId=${convId}`;
+            const chatUrl = import.meta.env.VITE_CHAT_DASHBOARD_URL || "http://localhost:5174";
+            window.location.href = `${chatUrl}?conversationId=${convId}`;
         } catch (error) {
             console.error("Error booking call:", error);
             const message = error.response?.data?.message || "Failed to book a call. Please try again.";

@@ -1,7 +1,7 @@
 import axios from "axios";
 
-// Base API configuration
-const API_BASE_URL = "http://localhost:5000/api";
+// Base API configuration - use env variable or default to localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 // Create axios instance with defaults
 const api = axios.create({
@@ -33,7 +33,8 @@ api.interceptors.response.use(
         return api(originalRequest);
       } catch (refreshError) {
         // Refresh failed - redirect to login
-        window.location.href = "http://localhost:5173";
+        const frontendUrl = import.meta.env.VITE_FRONTEND_URL || "http://localhost:5173";
+        window.location.href = frontendUrl;
         return Promise.reject(refreshError);
       }
     }

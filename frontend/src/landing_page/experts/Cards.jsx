@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
-import axios from "axios";
 import ExpertCard from "./ExpertCard";
 import { useAuth } from "../../context/AuthContext";
+import { expertsAPI } from "../../services/api";
 import "./Cards.css";
 
 function Cards({ selectedIndustry = "All Categories", searchQuery = "", sortOption = "Highest Rated" }) {
@@ -13,10 +13,11 @@ function Cards({ selectedIndustry = "All Categories", searchQuery = "", sortOpti
   useEffect(() => {
     const fetchExperts = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/experts");
-        setExperts(res.data);                        // update state
+        const res = await expertsAPI.getAll();
+        setExperts(res);
       } catch (err) {
         setError("Failed to fetch experts.");
+        console.error(err);
       } finally {
         setLoading(false);
       }
