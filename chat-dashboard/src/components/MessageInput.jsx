@@ -3,10 +3,13 @@ import { FiPaperclip, FiSend } from 'react-icons/fi';
 import { useConversations } from '../contexts/ConversationsProvider';
 import { chatAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { containsProfanity } from '../utils/profanityFilter';
+import WarningModal from './WarningModal';
 import './MessageInput.css';
 
 const MessageInput = ({ conversationId }) => {
     const [message, setMessage] = useState('');
+    const [showWarning, setShowWarning] = useState(false);
     const { addMessage } = useConversations();
     const { user } = useAuth();
 
@@ -14,6 +17,13 @@ const MessageInput = ({ conversationId }) => {
         if (!message.trim() || !conversationId) return;
 
         const content = message.trim();
+        
+        // Check for profanity before sending
+        if (containsProfanity(content)) {
+            setShowWarning(true);
+            return; // Don't send the message
+        }
+        
         setMessage('');
 
         try {
@@ -64,21 +74,28 @@ const MessageInput = ({ conversationId }) => {
     };
 
     return (
-        <div className="message-input-container">
-            <button className="icon-button" title="Attach file">
-                <FiPaperclip size={22} />
-            </button>
-            <input
-                type="text"
-                placeholder="Type your message..."
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                onKeyPress={handleKeyPress}
+        <>
+            <div className="message-input-container">
+                <button className="icon-button" title="Attach file">
+                    <FiPaperclip size={22} />
+                </button>
+                <input
+                    type="text"
+                    placeholder="Type your message..."
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                />
+                <button className="send-button" onClick={handleSend} disabled={!message.trim()}>
+                    <FiSend size={20} />
+                </button>
+            </div>
+            <WarningModal
+                isOpen={showWarning}
+                onClose={() => setShowWarning(false)}
+                message="Please do not use offensive language, your account might be suspended."
             />
-            <button className="send-button" onClick={handleSend} disabled={!message.trim()}>
-                <FiSend size={20} />
-            </button>
-        </div>
+        </>
     );
 };
 
