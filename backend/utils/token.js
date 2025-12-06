@@ -18,4 +18,10 @@ const hashToken = async (token) => {
 const verifyAccessToken = (token) => jwt.verify(token, process.env.JWT_ACCESS_SECRET);
 const verifyRefreshToken = (token) => jwt.verify(token, process.env.JWT_REFRESH_SECRET);
 
-export { createAccessToken, createRefreshToken, hashToken, verifyAccessToken, verifyRefreshToken };
+export { 
+  createAccessToken, 
+  createRefreshToken, 
+  hashToken, 
+  verifyAccessToken, 
+  verifyRefreshToken 
+};

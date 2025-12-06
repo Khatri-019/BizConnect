@@ -9,6 +9,7 @@ import protectedRoutes from "./routes/protectedExample.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import activeUsersRoutes from "./routes/activeUsers.js";
 import cookieParser from "cookie-parser";
+import { errorHandler } from "./middlewares/errorHandler.js";
 
 // Load environment variables FIRST before using them
 dotenv.config();
@@ -86,15 +87,7 @@ app.use("/api/chat", chatRoutes);
 app.use("/api/active", activeUsersRoutes);
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error('Error:', err);
-  res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack })
-  });
-});
+app.use(errorHandler);
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-  console.log(`Allowed CORS origins: ${allowedOrigins.join(', ')}`);
-});
+// Export app for server.js to use with Socket.IO
+export default app;

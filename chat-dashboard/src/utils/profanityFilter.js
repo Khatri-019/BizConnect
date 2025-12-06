@@ -6,12 +6,12 @@
 // Comprehensive list of offensive words and phrases
 // This list includes common profanities, slurs, and offensive terms
 const PROFANITY_LIST = [
-  // Common profanities
+  // Common profanities (explicit offensive words only)
   'fuck', 'fucking', 'fucked', 'fucker', 'fucks',
   'shit', 'shitting', 'shitted', 'shits',
   'damn', 'damned', 'damnit',
   'hell', 'hells',
-  'ass', 'asses', 'asshole', 'assholes',
+  'asshole', 'assholes', // Only the offensive compound, not "ass" alone
   'bitch', 'bitches', 'bitching', 'bitched',
   'bastard', 'bastards',
   'crap', 'craps',
@@ -19,7 +19,7 @@ const PROFANITY_LIST = [
   
   // Stronger profanities
   'cunt', 'cunts',
-  'dick', 'dicks', 'dickhead', 'dickheads',
+  'dickhead', 'dickheads', // Only offensive compound, not "dick" alone
   'pussy', 'pussies',
   'cock', 'cocks',
   'whore', 'whores',
@@ -28,14 +28,9 @@ const PROFANITY_LIST = [
   // Offensive slurs (partial list - add more as needed)
   'nigger', 'niggers', 'nigga', 'niggas',
   'retard', 'retards', 'retarded',
-  'gay', 'gays', // Context-dependent, but included for filtering
   
-  // Other offensive terms
-  'idiot', 'idiots', 'idiotic',
-  'stupid', 'stupids',
-  'moron', 'morons',
-  'dumb', 'dumbs', 'dumbass', 'dumbasses',
-  'loser', 'losers',
+  // Offensive compounds only (not individual words that can be used in context)
+  'dumbass', 'dumbasses',
   
   // Variations with numbers/leetspeak
   'f*ck', 'f**k', 'f***', 'sh*t', 's**t', 'a$$', 'a**', 'b*tch', 'b**ch',
@@ -51,11 +46,12 @@ const PROFANITY_LIST = [
 /**
  * Normalizes text for profanity checking
  * Removes special characters, converts to lowercase, handles leetspeak
+ * Preserves word boundaries for accurate matching
  */
 function normalizeText(text) {
   return text
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, '') // Remove special characters
+    .replace(/[^a-z0-9\s]/g, ' ') // Replace special characters with spaces to preserve word boundaries
     .replace(/0/g, 'o')
     .replace(/1/g, 'i')
     .replace(/3/g, 'e')
@@ -65,11 +61,13 @@ function normalizeText(text) {
     .replace(/@/g, 'a')
     .replace(/\$/g, 's')
     .replace(/!/g, 'i')
+    .replace(/\s+/g, ' ') // Normalize multiple spaces to single space
     .trim();
 }
 
 /**
  * Checks if a message contains profanity
+ * Uses word boundary detection to avoid false positives
  * @param {string} message - The message to check
  * @returns {boolean} - True if profanity is detected, false otherwise
  */
@@ -79,27 +77,34 @@ export function containsProfanity(message) {
   }
 
   const normalizedMessage = normalizeText(message);
+  
+  // Split into words for more accurate matching
   const words = normalizedMessage.split(/\s+/);
-
-  // Check each word against the profanity list
+  
+  // Check each word against profanity list with word boundaries
   for (const word of words) {
-    // Direct match
-    if (PROFANITY_LIST.includes(word)) {
-      return true;
-    }
-
-    // Check if word contains any profanity (handles cases like "fuckinghell")
     for (const profanity of PROFANITY_LIST) {
-      if (word.includes(profanity) || profanity.includes(word)) {
+      // Escape special regex characters
+      const escaped = profanity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      
+      // Use word boundaries to ensure we match whole words only
+      // This prevents false positives like "class" matching "ass"
+      const wordBoundaryPattern = new RegExp(`\\b${escaped}\\b`, 'i');
+      
+      if (wordBoundaryPattern.test(word)) {
         return true;
       }
     }
   }
-
-  // Check for profanity in the entire normalized message (handles cases without spaces)
-  const messageWithoutSpaces = normalizedMessage.replace(/\s/g, '');
-  for (const profanity of PROFANITY_LIST) {
-    if (messageWithoutSpaces.includes(profanity)) {
+  
+  // Also check the entire normalized message for compound profanities
+  // (e.g., "fuckinghell" without spaces) but only for longer profanities
+  const longProfanities = PROFANITY_LIST.filter(p => p.length >= 4);
+  for (const profanity of longProfanities) {
+    const escaped = profanity.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // Check if profanity appears at word boundaries in the full message
+    const boundaryPattern = new RegExp(`(^|\\s)${escaped}(\\s|$)`, 'i');
+    if (boundaryPattern.test(normalizedMessage)) {
       return true;
     }
   }

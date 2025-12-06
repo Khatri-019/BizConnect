@@ -5,7 +5,8 @@ import MessageInput from './MessageInput';
 import LanguageSelector from './LanguageSelector';
 import { useConversations } from '../contexts/ConversationsProvider';
 import { useAuth } from '../contexts/AuthContext';
-import { activeUsersAPI, chatAPI } from '../services/api';
+import { chatAPI } from '../services/api';
+import { getSocket, emitUserActive } from '../services/socketService';
 import './RightPanel.css';
 
 const RightPanel = () => {
@@ -68,42 +69,45 @@ const RightPanel = () => {
         }
     }, [selectedId, conversation]);
 
-    // Ping server to update activity
+    // Use Socket.IO for user activity instead of polling
     useEffect(() => {
         if (!selectedId || !user) return;
 
-        const pingInterval = setInterval(async () => {
-            try {
-                await activeUsersAPI.ping(selectedId);
-            } catch (error) {
-                console.error("Error pinging:", error);
-            }
-        }, 30000); // Ping every 30 seconds
+        try {
+            const socket = getSocket();
+            
+            // Emit user active status
+            const pingInterval = setInterval(() => {
+                try {
+                    emitUserActive(selectedId);
+                } catch (error) {
+                    console.error("Error emitting user active:", error);
+                }
+            }, 30000); // Ping every 30 seconds
 
-        return () => clearInterval(pingInterval);
-    }, [selectedId, user]);
+            // Listen for other user's activity
+            const handleUserActive = (data) => {
+                if (data.conversationId === selectedId && data.userId === conversation?.user?.id) {
+                    setIsOtherUserActive(true);
+                    // Reset after 2 minutes of no activity
+                    setTimeout(() => setIsOtherUserActive(false), 120000);
+                }
+            };
 
-    // Check if other user is active
-    useEffect(() => {
-        if (!conversation || !user) return;
+            socket.on('user_active', handleUserActive);
 
-        const otherUserId = conversation.user?.id;
-        if (!otherUserId) return;
-
-        const checkActive = async () => {
-            try {
-                const result = await activeUsersAPI.checkActive(otherUserId, selectedId);
-                setIsOtherUserActive(result.isActive);
-            } catch (error) {
-                console.error("Error checking active status:", error);
-            }
-        };
-
-        checkActive();
-        const activeCheckInterval = setInterval(checkActive, 10000); // Check every 10 seconds
-
-        return () => clearInterval(activeCheckInterval);
-    }, [conversation, selectedId, user]);
+            return () => {
+                clearInterval(pingInterval);
+                try {
+                    socket.off('user_active', handleUserActive);
+                } catch (error) {
+                    console.error("Error removing socket listener:", error);
+                }
+            };
+        } catch (error) {
+            console.error("Error setting up Socket.IO for user activity:", error);
+        }
+    }, [selectedId, user, conversation]);
 
     const handleLanguageChange = async (language) => {
         setTargetLanguage(language);

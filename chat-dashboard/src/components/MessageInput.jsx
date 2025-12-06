@@ -4,6 +4,7 @@ import { useConversations } from '../contexts/ConversationsProvider';
 import { chatAPI } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { containsProfanity } from '../utils/profanityFilter';
+import { sendMessageViaSocket } from '../services/socketService';
 import WarningModal from './WarningModal';
 import './MessageInput.css';
 
@@ -44,21 +45,10 @@ const MessageInput = ({ conversationId }) => {
                 // Continue anyway - backend will handle translation if preference is set
             }
             
-            // Translation is handled automatically on backend based on receiver's language preference
-            const sentMessage = await chatAPI.sendMessage(conversationId, content);
-
-            // Add message to local state
-            addMessage(conversationId, {
-                id: sentMessage._id || sentMessage.id,
-                senderId: sentMessage.senderId,
-                senderRole: sentMessage.senderRole,
-                content: sentMessage.content,
-                translatedContent: sentMessage.translatedContent || "", // Empty string if not translated
-                isTranslated: sentMessage.isTranslated || false, // Ensure boolean
-                originalLanguage: sentMessage.originalLanguage || "en",
-                translatedLanguage: sentMessage.translatedLanguage || "en",
-                createdAt: sentMessage.createdAt,
-            });
+            // Send message via Socket.IO (real-time)
+            // The message will be added to state via Socket.IO event listener in useChatData
+            // No optimistic update to prevent duplicates - wait for server confirmation
+            sendMessageViaSocket(conversationId, content);
         } catch (error) {
             console.error("Error sending message:", error);
             alert("Failed to send message. Please try again.");

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { expertValidationSchema } from "./expertValidationSchema";
 import { authAPI, expertsAPI } from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
+import { useImageUpload } from "../../hooks/useImageUpload";
 import {
   LuUpload,
   LuUser,
@@ -20,16 +20,12 @@ import SignupCard from "./SignupCard";
 import { Button, Input, Label, Textarea } from "../../form_ui";
 import "./ExpertSignupForm.css";
 
-// Cloudinary config
-const CLOUD_NAME = "durgw6vpo";
-const UPLOAD_PRESET = "expert_profile_images";
-
 function ExpertSignupForm({ credentials, onBack, mode = "signup", onCancel, onSuccess }) {
   const { closeSignup, setAuthUser, user } = useAuth();
   const isEditMode = mode === "edit";
+  const { uploadImage, uploading, error: uploadError } = useImageUpload();
   
   const [previewImage, setPreviewImage] = useState(null);
-  const [uploading, setUploading] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [loadingProfile, setLoadingProfile] = useState(isEditMode);
 
@@ -74,32 +70,20 @@ function ExpertSignupForm({ credentials, onBack, mode = "signup", onCancel, onSu
     }
   }, [isEditMode, user, reset]);
 
-  // Upload image to Cloudinary
+  // Upload image to Cloudinary using hook
   const uploadToCloudinary = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     setPreviewImage(URL.createObjectURL(file));
     
-    const formData = new FormData();
-    formData.append("file", file);
-    formData.append("upload_preset", UPLOAD_PRESET);
-
-    try {
-      setUploading(true);
-      const res = await axios.post(
-        `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
-        formData,
-        { withCredentials: false } // Don't send cookies to Cloudinary
-      );
-      setValue("img", res.data.secure_url, { shouldValidate: true });
-    } catch (err) {
-      console.error("Upload error:", err);
-      setSubmitError("Image upload failed. Please try again.");
+    const imageUrl = await uploadImage(file);
+    if (imageUrl) {
+      setValue("img", imageUrl, { shouldValidate: true });
+    } else {
+      setSubmitError(uploadError || "Image upload failed. Please try again.");
       setValue("img", "", { shouldValidate: true });
       setPreviewImage(null);
-    } finally {
-      setUploading(false);
     }
   };
 
