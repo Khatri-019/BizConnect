@@ -13,13 +13,13 @@ function Hero() {
                 <div className="col">
                     <h1 className="hero-heading">
                         Connect Globally with <br />
-                        <span className="smart-word">Smart 1-1 </span>
-                        Video Consulting <br />& Business Deals
+                        <span className="smart-word">Smart 1-1  &nbsp;</span>
+                         Video Consulting <br />& Business Deals
                     </h1>
                     <p className="hero-para">
                         Bridge language barriers and streamline business <br /> connections
-                        with AI-powered translation, secure document sharing, <br /> and
-                        seamless video conferencing.
+                        with API-powered translation, secure document sharing, <br /> and
+                        seamless chat communication.
                     </p>
 
                     <div className="hero-buttons">

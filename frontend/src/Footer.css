@@ -3,6 +3,7 @@
   color: #a9b3c9; 
   padding-top: 4rem;
   padding-bottom: 1rem;
+  animation: fadeIn 0.8s ease-in-out;
 }
 
 .footer-top-row {
@@ -14,6 +15,11 @@
   align-items: center;
   gap: 1rem;
   margin-bottom: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.logo-container:hover {
+  transform: scale(1.05);
 }
 
 .logo-text {
@@ -33,10 +39,27 @@
   color: #ffffff;
   font-weight: 600;
   margin-bottom: 1.5rem;
+  position: relative;
+  padding-bottom: 0.5rem;
+}
+
+.footer-col h5::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 50px;
+  height: 2px;
+  background: linear-gradient(90deg, #3b82f6, #2563eb);
 }
 
 .footer-col ul li {
   margin-bottom: 0.75rem;
+  transition: transform 0.2s ease;
+}
+
+.footer-col ul li:hover {
+  transform: translateX(5px);
 }
 
 .footer-col ul li a {
@@ -44,29 +67,49 @@
   color: #a9b3c9;
   text-decoration: none;
   transition: color 0.2s ease-in-out;
+  display: inline-block;
 }
 
 .footer-col ul li a:hover {
   color: #ffffff;
 }
 
+.social-icons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
 .social-icons a {
   color: #a9b3c9;
-  font-size: 1.2rem;
-  margin-right: 1.5rem;
-  transition: color 0.2s ease-in-out;
+  font-size: 1.5rem;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .social-icons a:hover {
   color: #ffffff;
+  background: rgba(59, 130, 246, 0.2);
+  transform: translateY(-3px) scale(1.1);
 }
 
 .contact-list li {
   display: flex;
-  align-items: flex-start; /* Align icon and text at the top */
+  align-items: flex-start;
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
   line-height: 1.6;
+  transition: transform 0.2s ease;
+}
+
+.contact-list li:hover {
+  transform: translateX(5px);
 }
 
 .contact-list li div,
@@ -82,8 +125,13 @@
 
 .contact-icon {
   margin-right: 1rem;
-  margin-top: 0.2rem; /* Adjusted for better vertical alignment with text */
+  margin-top: 0.2rem;
   color: #a9b3c9;
+  transition: color 0.2s ease;
+}
+
+.contact-list li:hover .contact-icon {
+  color: #3b82f6;
 }
 
 .footer-bottom-row {
@@ -100,15 +148,134 @@
 
 .footer-bottom-links {
   text-align: right;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: flex-end;
 }
 
 .footer-bottom-links a {
   color: #a9b3c9;
   font-size: 0.85rem;
-  margin-left: 1.5rem;
   text-decoration: none;
+  transition: color 0.2s ease-in-out;
+  position: relative;
+}
+
+.footer-bottom-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #3b82f6;
+  transition: width 0.3s ease;
 }
 
 .footer-bottom-links a:hover {
   color: #ffffff;
+}
+
+.footer-bottom-links a:hover::after {
+  width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .footer-container {
+    padding-top: 3rem;
+  }
+  
+  .logo-text {
+    font-size: 1.8rem;
+  }
+  
+  .footer-description {
+    font-size: 1.2rem;
+  }
+  
+  .footer-col h5 {
+    font-size: 1.7rem;
+  }
+  
+  .footer-col ul li a {
+    font-size: 1.3rem;
+  }
+  
+  .contact-list li {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-container {
+    padding-top: 2.5rem;
+    padding-bottom: 1.5rem;
+  }
+  
+  .logo-text {
+    font-size: 1.6rem;
+  }
+  
+  .footer-description {
+    font-size: 1.1rem;
+  }
+  
+  .footer-col h5 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+  }
+  
+  .footer-col ul li a {
+    font-size: 1.2rem;
+  }
+  
+  .contact-list li {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  
+  .footer-bottom-links {
+    text-align: left;
+    justify-content: flex-start;
+    margin-top: 1rem;
+  }
+  
+  .footer-bottom-links a {
+    margin-left: 0;
+    margin-right: 1rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer-container {
+    padding-top: 2rem;
+  }
+  
+  .logo-text {
+    font-size: 1.4rem;
+  }
+  
+  .footer-description {
+    font-size: 1rem;
+  }
+  
+  .footer-col h5 {
+    font-size: 1.3rem;
+  }
+  
+  .footer-col ul li a {
+    font-size: 1.1rem;
+  }
+  
+  .contact-list li {
+    font-size: 1.1rem;
+  }
+  
+  .social-icons a {
+    font-size: 1.3rem;
+    width: 35px;
+    height: 35px;
+  }
 }

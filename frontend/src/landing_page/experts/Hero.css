@@ -1,20 +1,24 @@
 .experts-hero-container {
-    background-color: #f8f9fa; /* A light, neutral background */
+    background-color: #f8f9fa;
     padding-top: 5rem;
     padding-bottom: 5rem;
+    animation: fadeIn 0.8s ease-in-out;
 }
 
 .experts-hero-row h1 {
-    font-size: 4rem; /* Adjusted for better responsiveness */
+    font-size: 4rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
+    animation: slideUp 0.8s ease-out;
+    color: #1a1a1a;
 }
 
 .experts-hero-row p {
     font-size: 2rem;
     color: #6c757d;
+    animation: slideUp 0.8s ease-out 0.2s both;
+    opacity: 0;
 }
-
 
 .search-container {
     background-color: #ffffff;
@@ -23,8 +27,14 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     gap: 2rem; 
     margin-top: 2rem;
+    animation: slideUp 0.8s ease-out 0.4s both;
+    opacity: 0;
+    transition: box-shadow 0.3s ease;
 }
 
+.search-container:hover {
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.12);
+}
 
 .search-container .form-control,
 .search-container .form-select,
@@ -35,16 +45,16 @@
     padding-top: 0.75rem; 
     padding-bottom: 0.75rem;
     font-size: 1.3rem;
+    transition: all 0.3s ease;
 }
 
 .search-container .form-control:focus,
 .search-container .form-select:focus {
-    box-shadow: none;
-    background-color: #f4f4f7;
+    box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.1);
+    background-color: #ffffff;
+    border: 2px solid #0d6efd;
 }
 
-
-/* Style the dropdown button to match the other inputs */
 .custom-dropdown-toggle {
     background-color: #f4f4f7 !important;
     border: none;
@@ -63,13 +73,22 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: all 0.3s ease;
+}
+
+.custom-dropdown-toggle:hover {
+    background-color: #e9ecef !important;
 }
 
 .custom-dropdown-toggle::after {
     flex-shrink: 0;
     margin-left: 0.5rem;
+    transition: transform 0.3s ease;
 }
 
+.custom-dropdown-toggle[aria-expanded="true"]::after {
+    transform: rotate(180deg);
+}
 
 .dropdown-menu {
     min-width: 100%; 
@@ -80,8 +99,8 @@
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     padding: 0.3rem;
     overflow-x: hidden;
+    animation: fadeIn 0.3s ease-out;
 }
-
 
 .dropdown-item {
     display: flex;
@@ -96,6 +115,7 @@
     text-align: left;
     width: 100%;
     min-width: 0;
+    transition: all 0.2s ease;
 }
 
 .dropdown-item span {
@@ -109,14 +129,112 @@
     line-height: 1.4;
 }
 
-/* Ensure the checkmark icon doesn't cause overflow */
 .dropdown-item svg {
     flex-shrink: 0;
     margin-left: 0.5rem;
+    transition: transform 0.2s ease;
 }
 
-/* Add a subtle hover/focus effect to the items */
 .dropdown-item:hover, .dropdown-item:focus {
     background-color: rgb(231, 229, 229);
     color: #212529;
+    transform: translateX(5px);
+}
+
+.dropdown-item:hover svg {
+    transform: scale(1.2);
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+  .experts-hero-container {
+    padding-top: 4rem;
+    padding-bottom: 4rem;
+  }
+  
+  .experts-hero-row h1 {
+    font-size: 3rem;
+  }
+  
+  .experts-hero-row p {
+    font-size: 1.7rem;
+  }
+  
+  .search-container {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .custom-dropdown-toggle {
+    min-width: 100%;
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .experts-hero-container {
+    padding-top: 3rem;
+    padding-bottom: 3rem;
+  }
+  
+  .experts-hero-row h1 {
+    font-size: 2.5rem;
+  }
+  
+  .experts-hero-row p {
+    font-size: 1.4rem;
+  }
+  
+  .search-container .form-control,
+  .search-container .form-select,
+  .search-container .input-group-text {
+    font-size: 1.1rem;
+  }
+  
+  .custom-dropdown-toggle {
+    font-size: 1.1rem;
+  }
+  
+  .dropdown-item {
+    font-size: 1.1rem;
+    padding: 0.75rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .experts-hero-container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+  }
+  
+  .experts-hero-row h1 {
+    font-size: 2rem;
+  }
+  
+  .experts-hero-row p {
+    font-size: 1.2rem;
+  }
+  
+  .search-container {
+    padding: 0.5rem;
+  }
+  
+  .search-container .form-control,
+  .search-container .form-select,
+  .search-container .input-group-text {
+    font-size: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .custom-dropdown-toggle {
+    font-size: 1rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+  
+  .dropdown-item {
+    font-size: 1rem;
+    padding: 0.6rem;
+  }
 }

@@ -11,6 +11,7 @@ function WorksComponent() {
             <div className="row">
                 <div className="col">
                     <WorkCard
+                        index={0}
                         Icon={
                             <PersonAddAltIcon
                                 sx={{
@@ -31,8 +32,9 @@ function WorksComponent() {
 
                 <div className="col">
                       <WorkCard
+                        index={1}
                         Icon={
-                            <PersonAddAltIcon
+                            <CalendarTodayOutlinedIcon
                                 sx={{
                                     fontSize: "3.8rem",
                                     color: "#165bff",
@@ -50,8 +52,9 @@ function WorksComponent() {
                 </div>
                 <div className="col">
                       <WorkCard
+                        index={2}
                         Icon={
-                            <PersonAddAltIcon
+                            <VideocamIcon
                                 sx={{
                                     fontSize: "3.8rem",
                                     color: "#165bff",

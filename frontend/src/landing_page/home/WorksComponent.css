@@ -2,5 +2,50 @@
     padding: 10rem;
     display: flex;
     justify-content: space-around;
-    margin-top: -8rem;;
+    margin-top: -8rem;
+    animation: fadeIn 0.8s ease-in-out;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .works-card-container {
+    padding: 8rem 5rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .works-card-container {
+    padding: 6rem 3rem;
+    margin-top: -5rem;
+    flex-wrap: wrap;
+  }
+  
+  .works-card-container .row {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .works-card-container {
+    padding: 4rem 2rem;
+    margin-top: -3rem;
+  }
+  
+  .works-card-container .row {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .works-card-container .col {
+    width: 100%;
+    max-width: 100%;
+    margin-bottom: 2rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .works-card-container {
+    padding: 3rem 1rem;
+    margin-top: -2rem;
+  }
 }

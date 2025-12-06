@@ -1,47 +1,179 @@
 .work-card {
   border-radius: 2rem;
   width: 33rem;
-  height: 33rem;
+  min-height: 33rem;
   padding: 2rem;
   background-color: #fff;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
   transition: all 0.4s ease-in-out;
   margin-right: 2.5rem;
   margin-left: 2.5rem;
+  animation: scaleIn 0.6s ease-out;
+  position: relative;
+  overflow: hidden;
+}
+
+.work-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(13, 110, 253, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.work-card:hover::before {
+  left: 100%;
 }
 
 .work-card:hover {
-  transform: translateY(-10px); 
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4); 
+  transform: translateY(-10px) scale(1.02); 
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  border: 2px solid rgba(13, 110, 253, 0.2);
 }
 
 .work-card-icon-div{
-
    display: flex;
    gap: 1rem;
    padding: 1rem;
    align-items: center;
+   transition: transform 0.3s ease;
+}
+
+.work-card:hover .work-card-icon-div {
+  transform: scale(1.1);
 }
 
 .work-card-icon-text {
     font-size: 1.5rem;
     color: rgb(22, 91, 255);
+    font-weight: 600;
+    transition: color 0.3s ease;
+}
 
+.work-card:hover .work-card-icon-text {
+  color: rgb(13, 110, 253);
 }
 
 .work-card-title{
-    font-size:1.8rem;
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: #1a1a1a;
+    transition: color 0.3s ease;
 }
+
+.work-card:hover .work-card-title {
+  color: #0d6efd;
+}
+
 .work-card-para{
-    font-size:1.5rem;
+    font-size: 1.5rem;
     color: gray;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.work-card-list {
+  padding-left: 1.5rem;
 }
 
 .work-card-list li{
-    font-size:1.3rem
+    font-size: 1.3rem;
+    margin-bottom: 0.75rem;
+    transition: transform 0.2s ease, color 0.2s ease;
+    list-style-position: outside;
+}
+
+.work-card-list li:hover {
+  transform: translateX(5px);
+  color: #0d6efd;
 }
 
 ul.work-card-list li::marker {
-  color: #007bff; /* Change bullet color */
+  color: #007bff;
   font-size: 1.5rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .work-card {
+    width: 30rem;
+    min-height: 32rem;
+    margin-right: 2rem;
+    margin-left: 2rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .work-card {
+    width: 28rem;
+    min-height: 30rem;
+    margin-right: 1.5rem;
+    margin-left: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .work-card-title {
+    font-size: 1.6rem;
+  }
+  
+  .work-card-para {
+    font-size: 1.3rem;
+  }
+  
+  .work-card-list li {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .work-card {
+    width: 100%;
+    max-width: 35rem;
+    min-height: auto;
+    margin-right: 0;
+    margin-left: 0;
+    margin-bottom: 2rem;
+  }
+  
+  .work-card-title {
+    font-size: 1.5rem;
+  }
+  
+  .work-card-para {
+    font-size: 1.2rem;
+  }
+  
+  .work-card-list li {
+    font-size: 1.1rem;
+  }
+  
+  .work-card-icon-text {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .work-card {
+    padding: 1.5rem;
+    border-radius: 1.5rem;
+  }
+  
+  .work-card-title {
+    font-size: 1.3rem;
+  }
+  
+  .work-card-para {
+    font-size: 1.1rem;
+  }
+  
+  .work-card-list li {
+    font-size: 1rem;
+  }
+  
+  .work-card-icon-text {
+    font-size: 1.2rem;
+  }
 }
