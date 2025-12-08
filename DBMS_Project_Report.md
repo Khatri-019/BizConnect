@@ -2,21 +2,18 @@
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>1. Abstract</b></span>
+# 1. Abstract
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
 BizConnect is a comprehensive Database Management System (DBMS) application designed to facilitate expert consultation services and real-time communication. The platform provides a robust backend infrastructure built with Node.js and Express, coupled with interactive frontend applications developed using React and Vite. The system utilizes MongoDB as its primary database to manage users, experts, conversations, and messages efficiently. 
 
 This report documents the complete development lifecycle of the BizConnect project, including system design, database architecture, normalization principles, and the implementation of real-time communication features using Socket.IO. The project demonstrates best practices in API design, authentication mechanisms, and user interface development. The system is containerized using Docker for seamless deployment across different environments.
 
 Key features include user authentication, expert profile management, real-time chat functionality, conversation history tracking, and professional messaging capabilities. The application supports multiple user roles (user, expert, and admin) and implements comprehensive security measures through JWT-based authentication and bcrypt password hashing.
-</span>
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>2. Introduction</b></span>
+# 2. Introduction
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
 The BizConnect platform represents a modern solution for connecting users with expert professionals across various industries. In today's business landscape, access to expert advice and consultation is critical for decision-making processes. However, finding the right expert, establishing reliable communication, and maintaining conversation history can be challenging without a dedicated platform.
 
 BizConnect addresses these challenges by providing a unified platform where users can browse expert profiles, initiate consultations, and engage in real-time conversations. The system architecture is built on proven technologies and design patterns that ensure scalability, reliability, and security.
@@ -24,25 +21,21 @@ BizConnect addresses these challenges by providing a unified platform where user
 This report provides a comprehensive overview of the database design, system architecture, and implementation details of the BizConnect DBMS project. It covers the entire spectrum of database management, from conceptual design through implementation, including entity-relationship modeling, normalization, and practical deployment considerations.
 
 The project was developed collaboratively by a team of database and software engineering experts, incorporating industry best practices and modern development methodologies. Through this report, we aim to demonstrate the successful application of DBMS concepts in a real-world, production-ready application.
-</span>
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>3. Background, Motivation and Scope</b></span>
+# 3. Background, Motivation and Scope
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>3.1 Background</b></span>
+## 3.1 Background
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
 The digital transformation of business services has created new opportunities for connecting service providers with consumers globally. Professional consultation services have traditionally been limited by geographical constraints and availability. Digital platforms have revolutionized this landscape by enabling synchronous and asynchronous communication across time zones and physical boundaries.
 
 BizConnect was conceived as a response to the growing demand for a reliable, user-friendly platform that consolidates expert discovery, profile management, and communication into a single ecosystem. The project builds upon established database management principles while incorporating modern full-stack development practices.
 
 The application serves as both a practical tool for expert consultation and an educational platform demonstrating the implementation of complex database concepts in production environments.
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>3.2 Motivation</b></span>
+## 3.2 Motivation
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
 Several key motivations drove the development of BizConnect:
 
 1. **Accessibility**: To make expert consultation services accessible to a wider audience regardless of geographical location.
@@ -56,11 +49,9 @@ Several key motivations drove the development of BizConnect:
 5. **Scalability**: To design a system capable of handling growing user bases and increasing transaction volumes without performance degradation.
 
 6. **Educational Value**: To demonstrate the practical application of database management system concepts in a contemporary business application.
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>3.3 Scope</b></span>
+## 3.3 Scope
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
 The BizConnect project encompasses the following scope:
 
 **In Scope:**
@@ -84,15 +75,13 @@ The BizConnect project encompasses the following scope:
 - Advanced user notification systems (beyond socket events)
 
 The database design focuses on maintaining relational integrity while supporting the application's core functionality of expert consultation and real-time communication.
-</span>
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>4. Methodology</b></span>
+# 4. Methodology
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>4.1 Development Approach</b></span>
+## 4.1 Development Approach
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
 BizConnect was developed following an iterative, agile-inspired approach that emphasizes:
 
 1. **Requirements Analysis**: Understanding the functional and non-functional requirements of the consultation platform.
@@ -104,11 +93,9 @@ BizConnect was developed following an iterative, agile-inspired approach that em
 4. **Testing**: Validating functionality, data integrity, and security measures.
 
 5. **Deployment**: Containerizing the application using Docker for consistent environments.
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>4.2 Technology Stack</b></span>
+## 4.2 Technology Stack
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
 **Backend:**
 - Runtime: Node.js
 - Framework: Express.js
@@ -136,11 +123,9 @@ BizConnect was developed following an iterative, agile-inspired approach that em
 - Cloudinary for image management
 - Passport.js for authentication strategies
 - Nanoid for unique ID generation
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>4.3 Database Design Methodology</b></span>
+## 4.3 Database Design Methodology
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
 The database design followed these steps:
 
 1. **Entity Identification**: Identifying key entities such as Users, Experts, Conversations, and Messages.
@@ -156,15 +141,14 @@ The database design followed these steps:
 6. **Normalization**: Applying normalization rules to eliminate redundancy and ensure data consistency.
 
 7. **Index Optimization**: Adding indices to frequently queried fields for improved performance.
-</span>
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>5. Requirements</b></span>
+## 5. Requirements</b>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>5.1 Functional Requirements</b></span>
+### 5.1 Functional Requirements</b>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+
 **FR1: User Management**
 - Users must be able to register with username and password
 - Users must be able to authenticate using stored credentials
@@ -201,11 +185,11 @@ The database design followed these steps:
 - Online user tracking must be implemented
 - Real-time message delivery must be supported
 - Connection state changes must be reflected across clients
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>5.2 Non-Functional Requirements</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 5.2 Non-Functional Requirements</b>
+
+
 **NFR1: Performance**
 - System must respond to user queries within 200ms
 - Database queries must be optimized with appropriate indexing
@@ -237,13 +221,13 @@ The database design followed these steps:
 - Code must follow consistent naming conventions
 - System must be containerized for easy deployment
 - Configuration must be managed through environment variables
-</span>
+
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>6. Entity-Relationship (E-R) Diagram</b></span>
+## 6. Entity-Relationship (E-R) Diagram</b>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+
 The E-R diagram for BizConnect illustrates the relationships between four primary entities: User, Expert, Conversation, and Message.
 
 **Entity Description:**
@@ -291,15 +275,15 @@ The E-R diagram for BizConnect illustrates the relationships between four primar
 - EXPERT has one-to-many relationship with CONVERSATION (receives conversations)
 - CONVERSATION has one-to-many relationship with MESSAGE (contains messages)
 - USER has one-to-many relationship with MESSAGE (sends messages)
-</span>
+
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>7. Relational Database Design</b></span>
+## 7. Relational Database Design</b>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>7.1 Table Schemas</b></span>
+### 7.1 Table Schemas</b>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+
 **USERS Table**
 
 | Field Name | Data Type | Constraints | Description |
@@ -350,11 +334,11 @@ The E-R diagram for BizConnect illustrates the relationships between four primar
 | content | String | NOT NULL | Message content |
 | messageType | String | DEFAULT 'text' | Message classification |
 | createdAt | Date | DEFAULT NOW | Message timestamp |
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>7.2 Index Design</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 7.2 Index Design</b>
+
+
 Indices are created on frequently queried fields to enhance database performance:
 
 **USERS Table Indices:**
@@ -379,15 +363,15 @@ Indices are created on frequently queried fields to enhance database performance
 - COMPOSITE: (conversationId, createdAt) for conversation message retrieval
 - Regular: senderId (for sent message tracking)
 - Regular: recipientId (for received message tracking)
-</span>
+
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>8. Database Normalization</b></span>
+## 8. Database Normalization</b>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>8.1 Normalization Process</b></span>
+### 8.1 Normalization Process</b>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+
 The BizConnect database design follows normalization principles to minimize data redundancy and maintain data integrity. The design achieves Third Normal Form (3NF) with appropriate denormalization for performance optimization.
 
 **First Normal Form (1NF):**
@@ -401,11 +385,11 @@ All non-key attributes are independent of other non-key attributes. No transitiv
 - User role is stored directly in the USERS table (not derived from job position)
 - Expert rating is stored independently (not calculated from individual reviews)
 - Conversation metadata is stored explicitly (not derived from message timestamps)
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>8.2 Normalization Application</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 8.2 Normalization Application</b>
+
+
 **Example: User-Expert Relationship**
 
 *Non-normalized approach (violates BCNF):*
@@ -427,11 +411,11 @@ This separation eliminates redundancy and ensures that changes to expert informa
 **Example: Message Content**
 
 All message content is stored in the MESSAGE table with clear associations to conversations and users. This eliminates the need for separate tables and maintains referential integrity.
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>8.3 Referential Integrity</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 8.3 Referential Integrity</b>
+
+
 Foreign key relationships maintain referential integrity:
 
 1. **User Foreign Keys:**
@@ -446,15 +430,15 @@ Foreign key relationships maintain referential integrity:
    - MESSAGE.conversationId → CONVERSATIONS._id (with CASCADE delete)
 
 These constraints ensure that orphaned records cannot exist, maintaining database consistency.
-</span>
+
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>9. Data Directory</b></span>
+## 9. Data Directory</b>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>9.1 Data Dictionary</b></span>
+### 9.1 Data Dictionary</b>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+
 **USERS Table - Data Dictionary**
 
 | Field | Type | Size | Null | Key | Default | Description |
@@ -506,9 +490,9 @@ These constraints ensure that orphaned records cannot exist, maintaining databas
 | messageType | String | 20 | NO | - | 'text' | Message classification |
 | createdAt | Date | - | NO | - | NOW | Message timestamp |
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>9.2 Data Types and Constraints</b></span>
+### 9.2 Data Types and Constraints</b>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+
 **String Type:**
 - Used for text data (usernames, names, descriptions)
 - Maximum sizes specified to ensure efficiency
@@ -544,15 +528,15 @@ These constraints ensure that orphaned records cannot exist, maintaining databas
 - Reference constraint relationships
 - Ensure referential integrity
 - Prevent orphaned records
-</span>
+
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>10. Graphical User Interface</b></span>
+## 10. Graphical User Interface</b>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>10.1 Main Frontend Application</b></span>
+### 10.1 Main Frontend Application</b>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+
 The main frontend application serves as the primary interface for user registration, expert discovery, and profile management.
 
 **Key Screens:**
@@ -606,11 +590,11 @@ The main frontend application serves as the primary interface for user registrat
 - Consistent color scheme and typography
 - Responsive design supporting mobile, tablet, and desktop
 - Accessibility features including proper contrast ratios
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>10.2 Chat Dashboard Application</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 10.2 Chat Dashboard Application</b>
+
+
 The chat dashboard is a dedicated real-time messaging interface enabling instantaneous communication between users and experts.
 
 **Key Components:**
@@ -666,11 +650,11 @@ The chat dashboard is a dedicated real-time messaging interface enabling instant
 - Message timestamps and sender identification
 - Auto-scroll to latest messages
 - Smooth animations and transitions
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>10.3 Design Principles</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 10.3 Design Principles</b>
+
+
 Both frontend applications follow these design principles:
 
 1. **User-Centric Design**: Interfaces optimized for user tasks and workflows
@@ -688,15 +672,15 @@ Both frontend applications follow these design principles:
 7. **Feedback**: Visual feedback for user actions through loading states, success messages, and error alerts
 
 8. **Minimalism**: Clean interface removing unnecessary elements while maintaining functionality
-</span>
+
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>11. Source Code</b></span>
+## 11. Source Code</b>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>11.1 Backend Architecture</b></span>
+### 11.1 Backend Architecture</b>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+
 The backend follows a layered architecture pattern separating concerns into distinct modules:
 
 **Project Structure:**
@@ -751,11 +735,11 @@ backend/
 4. **Event-Driven**: Real-time communication through Socket.IO events
 
 5. **Dependency Injection**: Services instantiated with required dependencies
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>11.2 Authentication System</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 11.2 Authentication System</b>
+
+
 The authentication system implements JWT-based token management with refresh token rotation:
 
 **Authentication Flow:**
@@ -782,11 +766,11 @@ The authentication system implements JWT-based token management with refresh tok
 - Refresh tokens stored in secure, HTTP-only cookies
 - Token revocation list maintained for logout
 - Refresh token rotation on each refresh operation
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>11.3 Database Models and Schemas</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 11.3 Database Models and Schemas</b>
+
+
 **User Model and Schema:**
 - Extends Mongoose schema with authentication methods
 - Pre-save hook encrypts passwords before storage
@@ -815,11 +799,11 @@ The authentication system implements JWT-based token management with refresh tok
 - Type enforcement preventing type coercion errors
 - Custom validators for complex business rules
 - Error messages providing clear feedback on validation failures
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>11.4 API Endpoints</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 11.4 API Endpoints</b>
+
+
 **Authentication Endpoints:**
 - POST `/api/auth/register` - User registration
 - POST `/api/auth/login` - User authentication
@@ -848,11 +832,11 @@ The authentication system implements JWT-based token management with refresh tok
 **Active Users:**
 - GET `/api/active-users` - Get list of online users
 - WebSocket event tracking for real-time status
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>11.5 Frontend Source Code</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 11.5 Frontend Source Code</b>
+
+
 **Main Frontend Structure:**
 ```
 frontend/src/
@@ -909,15 +893,15 @@ chat-dashboard/src/
 - Loading states and skeleton screens
 - Accessibility attributes (aria-labels, roles)
 - Performance optimization (code splitting, lazy loading)
-</span>
+
 
 ---
 
-## <span style="font-size: 16pt; font-family: Times New Roman;"><b>12. Conclusion</b></span>
+## 12. Conclusion</b>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>12.1 Project Summary</b></span>
+### 12.1 Project Summary</b>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+
 BizConnect represents a successful implementation of comprehensive database management system principles in a production-ready application. The project demonstrates the seamless integration of database design, backend services, real-time communication, and user interfaces to create a cohesive platform for expert consultation services.
 
 Throughout this report, we have documented:
@@ -937,11 +921,11 @@ Throughout this report, we have documented:
 7. **Security**: Multiple security layers including password hashing, JWT authentication, and role-based access control
 
 8. **Deployment**: Docker containerization supporting consistent deployment across environments
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>12.2 Key Achievements</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 12.2 Key Achievements</b>
+
+
 **Technical Achievements:**
 - Successfully implemented user authentication with secure password hashing
 - Designed and normalized database schema achieving 3NF
@@ -966,11 +950,11 @@ Throughout this report, we have documented:
 - Comprehensive error handling and user feedback
 - Clean, maintainable code following industry patterns
 - Docker containerization for deployment consistency
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>12.3 Learning Outcomes</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 12.3 Learning Outcomes</b>
+
+
 This project provided valuable learning opportunities in:
 
 1. **Database Management**: Practical application of normalization, E-R modeling, and relational database design
@@ -988,11 +972,11 @@ This project provided valuable learning opportunities in:
 7. **System Design**: Architectural patterns, separation of concerns, and scalability considerations
 
 8. **Collaboration**: Team coordination in developing interconnected systems
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>12.4 Future Enhancements</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 12.4 Future Enhancements</b>
+
+
 Potential areas for future development include:
 
 1. **Payment Integration**: Stripe or PayPal integration for consultation fee processing
@@ -1018,11 +1002,11 @@ Potential areas for future development include:
 11. **Database Replication**: MongoDB replica sets for high availability and disaster recovery
 
 12. **Monitoring & Logging**: ELK stack (Elasticsearch, Logstash, Kibana) for comprehensive system monitoring
-</span>
 
-### <span style="font-size: 14pt; font-family: Times New Roman;"><b>12.5 Final Remarks</b></span>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+### 12.5 Final Remarks</b>
+
+
 The BizConnect project successfully demonstrates the application of database management system principles to solve real-world business problems. The comprehensive documentation in this report provides a foundation for understanding the system's architecture, implementation, and operational characteristics.
 
 The collaborative effort of the development team resulted in a robust, scalable, and maintainable system that serves as both a functional platform and an educational resource. The adherence to industry best practices, comprehensive security measures, and thoughtful system design position BizConnect for successful deployment and future growth.
@@ -1030,13 +1014,13 @@ The collaborative effort of the development team resulted in a robust, scalable,
 This project reinforces the critical importance of proper database design, security implementation, and architectural planning in modern software development. As the platform scales to serve larger user bases, the solid foundation established through careful DBMS principles will continue to support reliable, efficient operations.
 
 We are confident that BizConnect provides significant value to users seeking expert consultation services while serving as an exemplary case study in database management system application development.
-</span>
+
 
 ---
 
-## <span style="font-size: 14pt; font-family: Times New Roman;"><b>References</b></span>
+## References</b>
 
-<span style="font-size: 12pt; font-family: Times New Roman;">
+
 1. Ramakrishnan, R., & Gehrke, J. (2002). Database Management Systems. McGraw-Hill.
 
 2. Connolly, T. M., & Begg, C. E. (2014). Database Systems: A Practical Approach to Design, Implementation, and Management. Pearson.
@@ -1056,7 +1040,7 @@ We are confident that BizConnect provides significant value to users seeking exp
 9. Docker Documentation. https://docs.docker.com/
 
 10. OAuth 2.0 Security Best Practices. https://tools.ietf.org/html/rfc6749
-</span>
+
 
 ---
 
